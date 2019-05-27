@@ -96,26 +96,27 @@ def show(inputfield, trajectoryFile=None, particleDensity=False, \
         magnitude = np.sqrt(U**2 + V**2)
         plotfield = ax.quiver(lons, lats, U, V, magnitude, alpha=.5)
     else:
-        plotfield = ax.pcolor(lons, lats, inputfield.data[0,:,:], transform=ccrs.PlateCarree(), zorder=1)
+        plotfield = ax.pcolormesh(lons, lats, inputfield.data[0,:,:], transform=ccrs.PlateCarree(), zorder=1)
     
     # Colorbar
     divider = make_axes_locatable(ax)
     ax_cb   = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
     fig.add_axes(ax_cb)
     cbar    = plt.colorbar(plotfield, cax=ax_cb)
+    unitBrackets = True
     if particleDensity:
-        units = 'number of particles'
+        units = '(number of particles)'
     elif inputfield.name == 'U':
-        units = 'm/s'
-    elif inputfield.name == 'V':
-        units = 'm/s'
+        units = '(m/s)'
+    elif inputfield.name == '(V)':
+        units = '(m/s)'
     elif vectorField:
-        units = 'm/s'
+        units = '(m/s)'
     elif inputfield.name == 'Vh':
-        units = '$m^2/s$'
+        units = '($m^2/s$)'
     else:
         units = ''
-    cbar.ax.set_ylabel(f'({units})')
+    cbar.ax.set_ylabel(f'{units}')
     
     # Title
     if particleDensity:
@@ -148,7 +149,7 @@ class animation:
         particle_map.set_extent((-10,20,50,80), crs=map_crs)
         particle_map.coastlines()
         particle_map.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
-        particle_map.pcolor(EEZ_lons, EEZ_lats, EEZ, transform=map_crs, cmap='Set3', zorder=1)
+        particle_map.pcolormesh(EEZ_lons, EEZ_lats, EEZ, transform=map_crs, cmap='Set3', zorder=1)
         gl = particle_map.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
         gl.xlabels_top = False
         gl.ylabels_right = False
