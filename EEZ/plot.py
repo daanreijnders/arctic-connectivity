@@ -2,6 +2,7 @@
 import numpy as np
 import xarray as xr
 import pickle
+import pandas as pd
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -154,7 +155,7 @@ def show(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1,
 
 
 class particleAnimation:
-    def create(pfile, field=None, margin=3, polar=False, nbar=False, eezIDmap=None, barLength=100, titleAttribute='', fps=24):
+    def create(pfile, field=None, margin=3, polar=False, nbar=False, EEZ_mapping=None, barLength=100, titleAttribute='', fps=24):
         """Create particle animations
         
         :param pfile: particleset.nc file
@@ -203,14 +204,11 @@ class particleAnimation:
             fieldName = field.name
             if fieldName == 'EEZ':
                 colormap = 'Set3'
-                data = field.data[0,:,:]
             elif fieldName == 'U' or 'V':
                 colormap = 'viridis'
-                data = field.data
             else:
                 colormap = 'viridis'
-                field.data
-            particle_map.pcolormesh(field.lon, field.lat, data, transform=map_crs, cmap=colormap, zorder=1)
+            particle_map.pcolormesh(field.lon, field.lat, field.data[0,:,:], transform=map_crs, cmap=colormap, zorder=1)
         else:
             fieldName = 'noField'
             
@@ -264,7 +262,7 @@ class particleAnimation:
             barplot.set_yticks(np.arange(nbar))
             if eezIDmap is not None:
                 # Map EEZ IDs to ISO country codes (ROOM FOR IMPROVEMENT ON HANDLING THIS MAPPING PROCESS)
-                EEZ_df = pickle.load(eezIDmap)['df']
+                EEZ_df = pandas.read_json(EEZ_mapping)
                 barplot.set_yticklabels([EEZ_df[EEZ_df['ID'] == ID]['ISO'].values[0] for ID in plotEEZbars])
             else: 
                 barplot.set_yticklabels([str(label) for label in plotEEZbars])
