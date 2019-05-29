@@ -135,7 +135,7 @@ def show(inputfield, trajectoryFile=None, particleDensity=False, \
 
 
 class particleAnimation:
-    def EEZ_particles(pfile, EEZ_ds, bleed=3, polar=False, nbar=False, eezIDmap=None, barlength=100, fps=24):
+    def EEZ_particles(pfile, EEZ_ds, bleed=3, polar=False, nbar=False, eezIDmap=None, barLength=100, fps=24):
         # Load arrays from file
         lon = np.ma.filled(pfile.variables['lon'], np.nan)
         lat = np.ma.filled(pfile.variables['lat'], np.nan)
