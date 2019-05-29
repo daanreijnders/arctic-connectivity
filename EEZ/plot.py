@@ -260,7 +260,7 @@ class particleAnimation:
             bar    = barplot.barh(np.arange(nbar), EEZ_counter(currtime))
             barplot.set_xlim(0, barLength)
             barplot.set_yticks(np.arange(nbar))
-            if eezIDmap is not None:
+            if EEZ_mapping is not None:
                 # Map EEZ IDs to ISO country codes (ROOM FOR IMPROVEMENT ON HANDLING THIS MAPPING PROCESS)
                 EEZ_df = pandas.read_json(EEZ_mapping)
                 barplot.set_yticklabels([EEZ_df[EEZ_df['ID'] == ID]['ISO'].values[0] for ID in plotEEZbars])
