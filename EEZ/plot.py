@@ -1,4 +1,4 @@
-"""This package contains specific tools I use for my research project."""
+"""Plotting and animation tools"""
 import numpy as np
 import xarray as xr
 import pickle
@@ -14,18 +14,32 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from parcels import (grid, Field, FieldSet, ParticleSet,
                      ErrorCode, ParticleFile, Variable, plotTrajectoriesFile)
 
-def show(inputfield, trajectoryFile=None, particleDensity=False, \
-         binGridWidth=1, latrange=(-90, 90), lonrange=(-180, 180), \
-         coast=True, land=True, polar=False, \
-         vectorField=False, export=None, t_end=None, titleAttribute=""):
+#########################################
+
+
+def show(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, land=True, polar=False, vectorField=False, export=None, t_end=None, titleAttribute=""):
     """This function creates a cartopy plot of the input field.
-    ADD DOCUMENTATION. ADD TIMESTAMP
+    
+    :param inputfield: field to plot
+    :param trajectoryFile: file containing particletrajectories
+    :param particleDensity: Boolean to specify whether to create a 2D histogram
+    :param binGridWidth: if particleDensity == True, specify width (in degrees) of histogram bins
+    :param latRange: tuple to specify latitudinal extent of plot (minLat, maxLat)
+    :param lonRange: tuple to specify longitudinal extent of plot (minLon, maxLon)
+    :param coast: boolean to specify whether to plot coast
+    :param land: boolean to specify whether to plot land mask
+    :param polar: boolean to specify plot should be NorthPolarStereo
+    :param vectorfield: boolean to plot velocity field as vectors (using quivers)
+    :param export: name for .png export. If None, won't export
+    :param t_end: if trajectory field is plotted, index to specify until which timestep particle trajectories are plotted
+    :param titleAttribute: string to extend the title of the plot with
     """
+    
     if not isinstance(inputfield, Field): raise TypeError("field is not a parcels fieldobject")
     if inputfield.grid.defer_load:
         inputfield.fieldset.computeTimeChunk(inputfield.grid.time[0], 1)    
-    minlat, maxlat = latrange
-    minlon, maxlon = lonrange
+    minLat, maxLat = latRange
+    minLon, maxLon = lonRange
     lons    = inputfield.grid.lon
     lats    = inputfield.grid.lat
     fig     = plt.figure()
@@ -36,7 +50,7 @@ def show(inputfield, trajectoryFile=None, particleDensity=False, \
     ax = plt.axes(projection=map_crs)
     
     # Determine boundaries and add land mask
-    ax.set_extent((minlon,maxlon,minlat,maxlat), crs=ccrs.PlateCarree())
+    ax.set_extent((minLon,maxLon,minLat,maxLat), crs=ccrs.PlateCarree())
     if coast:
         ax.coastlines()
     if land:
@@ -107,6 +121,7 @@ def show(inputfield, trajectoryFile=None, particleDensity=False, \
     fig.add_axes(ax_cb)
     cbar    = plt.colorbar(plotfield, cax=ax_cb)
     unitBrackets = True
+    # Set units
     if particleDensity:
         units = '(number of particles)'
     elif inputfield.name == 'U':
@@ -121,7 +136,7 @@ def show(inputfield, trajectoryFile=None, particleDensity=False, \
         units = ''
     cbar.ax.set_ylabel(f'{units}')
     
-    # Title
+    # Set title of plot
     if particleDensity:
         titlestring = f"Particle distributions {titleAttribute}"
     elif trajectoryFile != None:
@@ -129,13 +144,29 @@ def show(inputfield, trajectoryFile=None, particleDensity=False, \
     else:
         titlestring = inputfield.name
     ax.set_title(titlestring)
-    if export != None:
-        plt.savefig(f'figures/{export}.png', dpi=300)
+    # Export as figure
+    if export:
+        if export[-4] == '.':
+            plt.savefig(f'figures/{export}', dpi=300)
+        else:
+            plt.savefig(f'figures/{export}.png', dpi=300)
     plt.show()
 
 
 class particleAnimation:
-    def EEZ_particles(pfile, EEZ_ds, bleed=3, polar=False, nbar=False, eezIDmap=None, barLength=100, fps=24):
+    def create(pfile, field=None, margin=3, polar=False, nbar=False, eezIDmap=None, barLength=100, titleAttribute='', fps=24):
+        """Create particle animations
+        
+        :param pfile: particleset.nc file
+        :param field: field to plot animation on
+        :param margin: number of degrees of margin around maximum extent that particles have travelled
+        :param polar: boolean to specify plot should be NorthPolarStereo
+        :param nbar: specify number of bars in barchart. If False, no barchart is produced
+        :param eezIDmap: dataframe linking EEZ ID's to name
+        :param barLength: integer specifying maximum y-extent of barchart
+        :param fps: frames per second of animation
+        :param titleAttribute: string to extend the title of the plot with
+        """
         # Load arrays from file
         lon = np.ma.filled(pfile.variables['lon'], np.nan)
         lat = np.ma.filled(pfile.variables['lat'], np.nan)
@@ -143,39 +174,54 @@ class particleAnimation:
         EEZ_evol = np.ma.filled(pfile.variables['z'], np.nan)
         mesh = pfile.attrs['parcels_mesh'] if 'parcels_mesh' in pfile.attrs else 'spherical'
         
+        # Set projection
+        if polar:
+            map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
+        else:
+            map_crs = ccrs.PlateCarree()
+        
+        # Create figure
+        fig     = plt.figure(figsize=(9,5))
+        particle_map = plt.subplot(projection=map_crs)  
+        
+        # Find extent for plot
         minlon = np.amin(pfile.variables['lon'])
         minlat = np.amin(pfile.variables['lat'])
         maxlon = np.amax(pfile.variables['lon'])
         maxlat = np.amax(pfile.variables['lat'])
         if polar:
-            extent = (0, 360, minlat-bleed, 90)
+            extent = (0, 360, minlat-margin, 90)
         else:
-            extent = (max(minlon-bleed, -180), min(maxlon+bleed, 180), max(minlat-bleed, -90), min(maxlat+bleed, 90))
-        
-        if polar:
-            map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
-        else:
-            map_crs = ccrs.PlateCarree()
-        # Create figure
-        fig     = plt.figure(figsize=(9,5))
-        particle_map = plt.subplot(projection=map_crs)   
-
-        # Add background for land plot
+            extent = (max(minlon-margin, -180), min(maxlon+margin, 180), max(minlat-margin, -90), min(maxlat+margin, 90))
         particle_map.set_extent(extent, crs=map_crs)
+        
+        # Add coastlines and land mask
         particle_map.coastlines()
         particle_map.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
         
-        EEZ = EEZ_ds['EEZ'][:,:][0]
-        EEZ_lats = EEZ_ds['latitude'].data
-        EEZ_lons = EEZ_ds['longitude'].data
-        
-        particle_map.pcolormesh(EEZ_lons, EEZ_lats, EEZ, transform=map_crs, cmap='Set3', zorder=1)
+        if field:
+            fieldName = field.name
+            if fieldName == 'EEZ':
+                colormap = 'Set3'
+                data = field.data[0,:,:]
+            elif fieldName == 'U' or 'V':
+                colormap = 'viridis'
+                data = field.data
+            else:
+                colormap = 'viridis'
+                field.data
+            particle_map.pcolormesh(field.lon, field.lat, data, transform=map_crs, cmap=colormap, zorder=1)
+        else:
+            fieldName = 'noField'
+            
+        # Draw gridlines
         gl = particle_map.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
         gl.xlabels_top = False
         gl.ylabels_right = False
         gl.xformatter = LONGITUDE_FORMATTER
         gl.yformatter = LATITUDE_FORMATTER
 
+        # Determine plotting time indices
         plottimes = np.unique(time)
         if isinstance(plottimes[0], (np.datetime64, np.timedelta64)):
             plottimes = plottimes[~np.isnat(plottimes)]
@@ -184,12 +230,14 @@ class particleAnimation:
                 plottimes = plottimes[~np.isnan(plottimes)]
             except:
                 pass
-        print('Start and end plottimes:', plottimes[0], plottimes[-1])
         currtime = time == plottimes[0]
-
+    
+        # Create initial scatter plot of particles
         scat   = particle_map.scatter(lon[currtime], lat[currtime], s=20, color='k', transform=ccrs.Geodetic())
         
-        if nbar:
+        # Add bar chart
+        if nbar and fieldName=='EEZ':
+            # Determine EEZs that are most visited in pfile
             uniques, counts = np.unique(np.where(np.isnan(pfile['EEZ'].data), -1, pfile['EEZ'].data), return_counts=True) # NaNs become -1
             EEZoccurenceDict = dict(zip(uniques, counts))
             EEZoccurenceDict.pop(-1)
@@ -208,15 +256,14 @@ class particleAnimation:
                     except ValueError:
                         pass
                 return currCount
-
+            # Draw bar chart
             divider = make_axes_locatable(particle_map)
-        
             barplot = divider.append_axes("right", size=2, pad=1, axes_class=plt.Axes)
-
             bar    = barplot.barh(np.arange(nbar), EEZ_counter(currtime))
             barplot.set_xlim(0, barLength)
             barplot.set_yticks(np.arange(nbar))
             if eezIDmap is not None:
+                # Map EEZ IDs to ISO country codes (ROOM FOR IMPROVEMENT ON HANDLING THIS MAPPING PROCESS)
                 EEZ_df = pickle.load(eezIDmap)['df']
                 barplot.set_yticklabels([EEZ_df[EEZ_df['ID'] == ID]['ISO'].values[0] for ID in plotEEZbars])
             else: 
@@ -227,7 +274,8 @@ class particleAnimation:
         
         title = fig.suptitle('Particles at time ' + str(plottimes[0])[:13])
         frames = np.arange(0, len(plottimes))
-
+        
+        # Animation
         def animate(t):
             currtime = time == plottimes[t]
             scat.set_offsets(np.vstack((lon[currtime], lat[currtime])).transpose())
@@ -236,7 +284,7 @@ class particleAnimation:
                 rect.set_width(width)
             return scat,
         anim = animation.FuncAnimation(fig, animate, frames=len(plottimes), blit=False)
-        anim.save('particle_EEZ_evo.mp4', fps=fps, metadata={'artist':'Daan', 'title':'Particles in EEZs'}, extra_args=['-vcodec', 'libx264'])
+        anim.save(f'particle_evolution_{fieldName}_{titleAttribute}.mp4', fps=fps, metadata={'artist':'Daan', 'title':f'Particles on {fieldName} - {titleAttribute}'}, extra_args=['-vcodec', 'libx264'])
 
         plt.show()
         plt.close()
