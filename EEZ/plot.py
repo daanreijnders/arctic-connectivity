@@ -233,7 +233,7 @@ class particleAnimation:
         currtime = time == plottimes[0]
     
         # Create initial scatter plot of particles
-        scat   = particle_map.scatter(lon[currtime], lat[currtime], s=20, color='k', transform=ccrs.Geodetic())
+        scat   = particle_map.scatter(lon[currtime], lat[currtime], s=20, color='k', transform=ccrs.Geodetic(), zorder=10)
         
         # Add bar chart
         if nbar and fieldName=='EEZ':
