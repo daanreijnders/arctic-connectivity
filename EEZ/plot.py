@@ -114,6 +114,7 @@ def show(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1,
         magnitude = np.sqrt(U**2 + V**2)
         plotfield = ax.quiver(lons, lats, U, V, magnitude, alpha=.5)
     else:
+        inputfield.fieldset.computeTimeChunk(inputfield.grid.time[0], 1)
         plotfield = ax.pcolormesh(lons, lats, inputfield.data[0,:,:], transform=ccrs.PlateCarree(), zorder=1)
     
     # Colorbar
@@ -208,6 +209,7 @@ class particleAnimation:
                 colormap = 'viridis'
             else:
                 colormap = 'viridis'
+            field.fieldset.computeTimeChunk(field.grid.time[0], 1)
             particle_map.pcolormesh(field.lon, field.lat, field.data[0,:,:], transform=map_crs, cmap=colormap, zorder=1)
         else:
             fieldName = 'noField'
@@ -262,7 +264,7 @@ class particleAnimation:
             barplot.set_yticks(np.arange(nbar))
             if EEZ_mapping is not None:
                 # Map EEZ IDs to ISO country codes (ROOM FOR IMPROVEMENT ON HANDLING THIS MAPPING PROCESS)
-                EEZ_df = pandas.read_json(EEZ_mapping)
+                EEZ_df = pd.read_json(EEZ_mapping)
                 barplot.set_yticklabels([EEZ_df[EEZ_df['ID'] == ID]['ISO'].values[0] for ID in plotEEZbars])
             else: 
                 barplot.set_yticklabels([str(label) for label in plotEEZbars])
@@ -278,8 +280,9 @@ class particleAnimation:
             currtime = time == plottimes[t]
             scat.set_offsets(np.vstack((lon[currtime], lat[currtime])).transpose())
             title.set_text('Particles in different EEZs at time ' + str(plottimes[t])[:13])
-            for rect, width in zip(bar, EEZ_counter(currtime)):
-                rect.set_width(width)
+            if nbar:
+                for rect, width in zip(bar, EEZ_counter(currtime)):
+                    rect.set_width(width)
             return scat,
         anim = animation.FuncAnimation(fig, animate, frames=len(plottimes), blit=False)
         anim.save(f'particle_evolution_{fieldName}_{titleAttribute}.mp4', fps=fps, metadata={'artist':'Daan', 'title':f'Particles on {fieldName} - {titleAttribute}'}, extra_args=['-vcodec', 'libx264'])
