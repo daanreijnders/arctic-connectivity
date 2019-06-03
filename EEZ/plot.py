@@ -128,7 +128,7 @@ def show(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1,
         units = '(number of particles)'
     elif inputfield.name == 'U':
         units = '(m/s)'
-    elif inputfield.name == '(V)':
+    elif inputfield.name == 'V':
         units = '(m/s)'
     elif vectorField:
         units = '(m/s)'
@@ -156,7 +156,7 @@ def show(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1,
 
 
 class particleAnimation:
-    def create(pfile, field=None, margin=3, polar=False, nbar=False, EEZ_mapping=None, barLength=100, titleAttribute='', fps=24):
+    def create(pfile, field=None, margin=3, polar=False, nbar=False, EEZ_mapping=None, barLength=100, titleAttribute='', mask=True, fps=24):
         """Create particle animations
         
         :param pfile: particleset.nc file
@@ -199,7 +199,8 @@ class particleAnimation:
         
         # Add coastlines and land mask
         particle_map.coastlines()
-        particle_map.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
+        if mask:
+            particle_map.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
         
         if field:
             fieldName = field.name
