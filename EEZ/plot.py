@@ -156,7 +156,7 @@ def show(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1,
 
 
 class particleAnimation:
-    def create(pfile, field=None, margin=3, polar=False, nbar=False, EEZ_mapping=None, barLength=100, titleAttribute='', mask=True, fps=24):
+    def create(pfile, field=None, margin=3, polar=False, nbar=False, EEZ_mapping=None, barLength=100, titleAttribute='', exportFolder='', mask=True, fps=24):
         """Create particle animations
         
         :param pfile: particleset.nc file
@@ -285,8 +285,10 @@ class particleAnimation:
                 for rect, width in zip(bar, EEZ_counter(currtime)):
                     rect.set_width(width)
             return scat,
-        anim = animation.FuncAnimation(fig, animate, frames=len(plottimes), blit=False)
-        anim.save(f'particle_evolution_{fieldName}_{titleAttribute}.mp4', fps=fps, metadata={'artist':'Daan', 'title':f'Particles on {fieldName} - {titleAttribute}'}, extra_args=['-vcodec', 'libx264'])
+        anim = animation.FuncAnimation(fig, animate, frames=len(plottimes), blit=True)
+        if exportFolder != '':
+            exportFolder = exportFolder + '/'
+        anim.save(f'{exportFolder}particle_evolution_{fieldName}_{titleAttribute}.mp4', fps=fps, metadata={'artist':'Daan', 'title':f'Particles on {fieldName} - {titleAttribute}'}, extra_args=['-vcodec', 'libx264'])
 
         plt.show()
         plt.close()
