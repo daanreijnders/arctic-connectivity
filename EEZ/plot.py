@@ -18,7 +18,7 @@ from parcels import (grid, Field, FieldSet, ParticleSet,
 #########################################
 
 
-def show(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, land=True, polar=False, vectorField=False, export=None, t_end=None, titleAttribute=""):
+def show(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, t_index=0,land=True, polar=False, vectorField=False, export=None, t_end=None, titleAttribute=""):
     """This function creates a cartopy plot of the input field.
     
     :param inputfield: field to plot
@@ -33,12 +33,13 @@ def show(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1,
     :param vectorfield: boolean to plot velocity field as vectors (using quivers)
     :param export: name for .png export. If None, won't export
     :param t_end: if trajectory field is plotted, index to specify until which timestep particle trajectories are plotted
+    :param t_index: index to obtain field from
     :param titleAttribute: string to extend the title of the plot with
     """
     
     if not isinstance(inputfield, Field): raise TypeError("field is not a parcels fieldobject")
     if inputfield.grid.defer_load:
-        inputfield.fieldset.computeTimeChunk(inputfield.grid.time[0], 1)    
+        inputfield.fieldset.computeTimeChunk(inputfield.grid.time[t_index], 1)    
     minLat, maxLat = latRange
     minLon, maxLon = lonRange
     lons    = inputfield.grid.lon
@@ -109,13 +110,14 @@ def show(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1,
         maxDens = np.max(density)
         plotfield = ax.pcolormesh(densLons, densLats, density, transform=map_crs, zorder=1)
     elif vectorField:
-        U = inputfield.fieldset.U.data[0,:,:]
-        V = inputfield.fieldset.V.data[0,:,:]
+        inputfield.fieldset.computeTimeChunk(inputfield.grid.time[t_index], 1)
+        U = inputfield.fieldset.U.data[t_index,:,:]
+        V = inputfield.fieldset.V.data[t_index,:,:]
         magnitude = np.sqrt(U**2 + V**2)
         plotfield = ax.quiver(lons, lats, U, V, magnitude, alpha=.5)
     else:
-        inputfield.fieldset.computeTimeChunk(inputfield.grid.time[0], 1)
-        plotfield = ax.pcolormesh(lons, lats, inputfield.data[0,:,:], transform=ccrs.PlateCarree(), zorder=1)
+        inputfield.fieldset.computeTimeChunk(inputfield.grid.time[t_index], 1)
+        plotfield = ax.pcolormesh(lons, lats, inputfield.data[t_index,:,:], transform=ccrs.PlateCarree(), zorder=1)
     
     # Colorbar
     divider = make_axes_locatable(ax)
@@ -144,7 +146,7 @@ def show(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1,
     elif trajectoryFile != None:
         titlestring = f"Particle trajectories {titleAttribute}"
     else:
-        titlestring = inputfield.name
+        titlestring = inputfield.name + ' at ' + str(inputfield.grid.timeslices.flatten()[t_index])[0:16]
     ax.set_title(titlestring)
     # Export as figure
     if export:
@@ -292,3 +294,4 @@ class particleAnimation:
 
         plt.show()
         plt.close()
+
