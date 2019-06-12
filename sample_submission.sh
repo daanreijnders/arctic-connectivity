@@ -14,9 +14,9 @@
 #$ -m s
 #
 # SGE: ouput in the current working dir
-#$ -wd /home/students/4302001/arctic-connectivity/EEZ
+#$ -wd /home/students/4302001/arctic-connectivity
 
 source $HOME/start_conda.sh
-cd /home/students/4302001/arctic-connectivity/EEZ
+cd /home/students/4302001/arctic-connectivity
 
 # COMMANDS HERE
