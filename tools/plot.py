@@ -18,7 +18,7 @@ from parcels import (grid, Field, FieldSet, ParticleSet,
 import os
 
 #########################################
-def fromDataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
+def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
                     coast=True, land=False, polar=False, export=None, \
                     units=None, t_end=None, title=""):
     # Extract Options
@@ -32,6 +32,9 @@ def fromDataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
     # Build axes
     fig     = plt.figure()
     ax      = plt.axes(projection=map_crs)
+
+    plotfield = ax.pcolormesh(lons, lats, data, transform=ccrs.PlateCarree())
+    
     ax.set_extent((minLon,maxLon,minLat,maxLat), crs=ccrs.PlateCarree())
     
     # Set masks
@@ -49,8 +52,6 @@ def fromDataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
         gl.ylabels_right = False
         gl.xformatter    = LONGITUDE_FORMATTER
         gl.yformatter    = LATITUDE_FORMATTER
-    
-    plotfield = ax.pcolormesh(lats, lons, data, transform=map_crs)
     
     # Colorbar
     divider = make_axes_locatable(ax)
@@ -70,7 +71,7 @@ def fromDataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
             plt.savefig(f'figures/{export}.png', dpi=300)
     plt.show()
 
-def show(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, t_index=0, land=True, polar=False, vectorField=False, export=None, t_end=None, titleAttribute=""):
+def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, t_index=0, land=True, polar=False, vectorField=False, export=None, t_end=None, titleAttribute=""):
     """This function creates a cartopy plot of the input field.
     
     :param inputfield: field to plot
