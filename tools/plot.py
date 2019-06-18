@@ -5,6 +5,7 @@ import pickle
 import pandas as pd
 
 import matplotlib.pyplot as plt
+import matplotlib.path as mpath
 import matplotlib.animation as animation
 
 import cartopy as cart
@@ -17,10 +18,18 @@ from parcels import (grid, Field, FieldSet, ParticleSet,
 
 import os
 
+def set_circular_boundary(ax):
+    theta = np.linspace(0, 2*np.pi, 400)
+    center, radius = [0.5, 0.5], 0.5
+    verts = np.vstack([np.sin(theta), np.cos(theta)]).T
+    circle = mpath.Path(verts * radius + center)
+    ax.set_boundary(circle, transform=ax.transAxes)
+    return circle
+
 #########################################
 def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
                     coast=True, land=False, polar=False, export=None, \
-                    units=None, t_end=None, title=""):
+                    units=None, t_end=None, title="", colormap=None):
     # Extract Options
     minLat, maxLat = latRange
     minLon, maxLon = lonRange
@@ -32,8 +41,6 @@ def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
     # Build axes
     fig     = plt.figure()
     ax      = plt.axes(projection=map_crs)
-
-    plotfield = ax.pcolormesh(lons, lats, data, transform=ccrs.PlateCarree())
     
     ax.set_extent((minLon,maxLon,minLat,maxLat), crs=ccrs.PlateCarree())
     
@@ -52,6 +59,17 @@ def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
         gl.ylabels_right = False
         gl.xformatter    = LONGITUDE_FORMATTER
         gl.yformatter    = LATITUDE_FORMATTER
+    # Circular clipping
+    if polar:
+        circle_clip = set_circular_boundary(ax)
+    
+    if not colormap:
+        colormap = 'viridis'
+    # Plot field
+    if polar: 
+        plotfield = ax.pcolormesh(lons, lats, data, transform=ccrs.PlateCarree(), clip_path=(circle_clip, ax.transAxes), cmap=colormap)
+    else:
+        plotfield = ax.pcolormesh(lons, lats, data, transform=ccrs.PlateCarree(), cmap=colormap)
     
     # Colorbar
     divider = make_axes_locatable(ax)
