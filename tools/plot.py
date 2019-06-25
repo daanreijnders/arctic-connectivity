@@ -89,7 +89,7 @@ def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
             plt.savefig(f'figures/{export}.png', dpi=300)
     plt.show()
 
-def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, t_index=0, land=True, polar=False, vectorField=False, export=None, t_end=None, titleAttribute=""):
+def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, t_index=0, land=True, polar=False, vectorField=False, export=None, t_end=None, titleAttribute="", colormap=None):
     """This function creates a cartopy plot of the input field.
     
     :param inputfield: field to plot
@@ -131,13 +131,16 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
     
     # Add gridlines
     if polar:
-        gl      = ax.gridlines()
+        gl = ax.gridlines()
     else: 
-        gl      = ax.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
-        gl.xlabels_top = False
+        gl = ax.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
+        gl.xlabels_top   = False
         gl.ylabels_right = False
-        gl.xformatter = LONGITUDE_FORMATTER
-        gl.yformatter = LATITUDE_FORMATTER
+        gl.xformatter    = LONGITUDE_FORMATTER
+        gl.yformatter    = LATITUDE_FORMATTER
+    # Circular clipping
+    if polar:
+        circle_clip = set_circular_boundary(ax)
     
     # Trajectories
     if trajectoryFile != None:
@@ -164,11 +167,12 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
                 ax.plot(np.transpose(lon), np.transpose(lat), color='black', alpha=0.1, transform=ccrs.Geodetic(), zorder=10, linewidth=0.5)
             else:
                 ax.plot(np.transpose(lon), np.transpose(lat), '.-', transform=ccrs.Geodetic(), zorder=10)
-    
+    if not colormap:
+        colormap = 'viridis'
     # Plot field
     if particleDensity:
-        densLats = np.arange(-90, 90, binGridWidth)
-        densLons = np.arange(-180, 180, binGridWidth)
+        densLats = np.arange(minLat, maxLat, binGridWidth)
+        densLons = np.arange(minLon, maxLon, binGridWidth)
         density = np.zeros((len(densLats), len(densLons)))
         for i in range(nPart):
 #             if particle.lon > 180:
@@ -187,16 +191,20 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
         magnitude = np.sqrt(U**2 + V**2)
         plotfield = ax.quiver(lons, lats, U, V, magnitude, alpha=.5)
     else:
+        # Base case: pColormesh
         inputfield.fieldset.computeTimeChunk(inputfield.grid.time[t_index], 1)
-        plotfield = ax.pcolormesh(lons, lats, inputfield.data[t_index,:,:], transform=ccrs.PlateCarree(), zorder=1)
+        if polar:
+            plotfield = ax.pcolormesh(lons, lats, inputfield.data[t_index,:,:], transform=ccrs.PlateCarree(), zorder=1, clip_path=(circle_clip, ax.transAxes), cmap=colormap)
+        else:
+            plotfield = ax.pcolormesh(lons, lats, inputfield.data[t_index,:,:], transform=ccrs.PlateCarree(), zorder=1, cmap=colormap)
     
     # Colorbar
     divider = make_axes_locatable(ax)
     ax_cb   = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
     fig.add_axes(ax_cb)
     cbar    = plt.colorbar(plotfield, cax=ax_cb)
-    unitBrackets = True
-    # Set units
+    
+        # Set units
     if particleDensity:
         units = '(number of particles)'
     elif inputfield.name == 'U':
