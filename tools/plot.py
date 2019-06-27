@@ -29,7 +29,7 @@ def set_circular_boundary(ax):
 #########################################
 def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
                     coast=True, land=False, polar=False, export=None, \
-                    units=None, t_end=None, title="", colormap=None):
+                    units=None, t_end=None, title="", colormap=None, size=None, cbar=True):
     # Extract Options
     minLat, maxLat = latRange
     minLon, maxLon = lonRange
@@ -39,7 +39,10 @@ def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
         map_crs = ccrs.PlateCarree()
     
     # Build axes
-    fig     = plt.figure()
+    if size:
+        fig     = plt.figure(figsize=size)
+    else:
+        fig     = plt.figure()
     ax      = plt.axes(projection=map_crs)
     
     ax.set_extent((minLon,maxLon,minLat,maxLat), crs=ccrs.PlateCarree())
@@ -83,6 +86,8 @@ def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
     ax.set_title(title)
     # Export as figure
     if export:
+        if not os.path.exists('figures'):
+            os.makedirs('figures')
         if export[-4] == '.':
             plt.savefig(f'figures/{export}', dpi=300)
         else:
