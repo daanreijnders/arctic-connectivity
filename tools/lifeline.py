@@ -1,5 +1,6 @@
 import time
 import math
+import argparse
 
 def sleep(seconds=0, minutes=0):
     timer = 0
@@ -25,3 +26,10 @@ def sleep(seconds=0, minutes=0):
                 print(f"\r Timer reached {curSec} seconds. Will stop at {numSec} seconds.", end="")
     print("\n Timer has ended")
     return None
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Sleep and print something every couple of minutes to keep the connection alive. Should check whether this is actually necessary.")
+    parser.add_argument('minutes', type=int, help='Minutes to go to sleep')
+    parser.add_argument('-s', '--seconds', default=0, type=int, help='Seconds to go to sleep.')
+    args = parser.parse_args()
+    sleep(seconds=args.seconds, minutes=args.minutes)

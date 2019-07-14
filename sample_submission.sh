@@ -3,7 +3,8 @@
 # SGE: the job name
 #$ -N JOB NAME HERE
 #$ -V
-#$ -l hostname=science-bs35 #make sure it is in the right node
+#$ -l h_rt=72:00:00
+#$ -l hostname=science-bs36 #make sure it is in the right node
 #
 #
 # SGE: your Email here, for job notification
