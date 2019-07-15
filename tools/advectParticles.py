@@ -25,7 +25,7 @@ readdir_ice = '/data/oceanparcels/input_data/CESM/0.1_deg/control/ice/arctic/'
 readdir_ocean = '/data/oceanparcels/input_data/CESM/0.1_deg/control/ocean/arctic/'
 readdir_mesh = '/scratch/DaanR/fields/'
 
-fieldfile_ocean = 'daily_CESM_0.1degree_controlrun_year_300_arctic_region_timed.nc'
+fieldfile_ocean = 'daily_CESM_0.1degree_controlrun_year_300_arctic_timed_no_cord.nc'
 fieldfile_ice = 'monthly_icefields_CESM_0.1degree_controlrun_year_300_arctic.nc'
 meshfile = 'POP_grid_coordinates.nc'
 
