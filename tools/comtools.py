@@ -29,17 +29,15 @@ class countGrid(myGrid):
         self.flatIdx = np.arange(len(self.lonIdx.flatten())).reshape(self.lonIdx.shape)
         self.nIdx = len(self.lonIdx.flatten())
         
-    def countInit(self, particleGrid):
-        self.initCount = np.histogram2d(particleGrid.lonlat[0,:,0], particleGrid.lonlat[0,:,1], bins=[self.lonBounds, self.latBounds])[0]
-        return self.initCount
-    
-    def countInit(self, particleGrid):
-        self.initCount = np.histogram2d(particleGrid.lonlat[0,:,0], particleGrid.lonlat[0,:,1], bins=[self.lonBounds, self.latBounds])[0]
-        return self.initCount
+    def particleCount(self, particleGrid, tindex=0):
+        count = np.histogram2d(particleGrid.lonlat[tindex,:,0], particleGrid.lonlat[tindex,:,1], bins=[self.lonBounds, self.latBounds])[0]
+        if tindex == 0:
+            self.initCount = count
+        return count
     
     def load_communities(self, cluFile):
         df = pd.read_csv(cluFile, delimiter=" ").set_index('node')
-        self.community_map = np.zeros(self.flatIdx.shape)
+        self.community_map = np.zeros(self.flatIdx.shape) #maybe NaNs everywhere unless the node is in the csv file.
         for i in range(self.flatIdx.shape[0]):
             for j in range(self.flatIdx.shape[1]):
                 self.community_map[i,j] = int(df['module'].loc[self.flatIdx[i,j]+1])
@@ -94,17 +92,11 @@ class particleGrid(myGrid):
                 plt.savefig(f'figures/{export}', dpi=300)
             else:
                 plt.savefig(f'figures/{export}.png', dpi=300)
-        plt.show()
+        return ax
     
     def add_advected(self, pset):
-        if hasattr(self, 'removedParticleCount'):
-            n = self.removedParticleCount
-        else:
-            n = self.initialParticleCount
-        newPos = np.zeros((1, n, 2))
-        for idx in np.arange(n):
-             newPos[0, idx, :] = [pset[idx].lon, pset[idx].lat]
-        self.lonlat = np.concatenate((self.lonlat, newPos), axis=0)
+        lonlat_init, lonlat_final = loadLonlat(pset)
+        self.lonlat = np.concatenate((self.lonlat, lonlat_final), axis=0)
 
 class transMat:
     def __init__(self, counter):
@@ -112,7 +104,7 @@ class transMat:
         self.sums = np.tile(self.counter.sum(axis=1),(self.counter.shape[1],1)).T
         self.data = np.divide(self.counter, self.sums, out=np.zeros_like(self.sums), where=self.sums!=0)
         
-def createTransition(pset, countGrid, timedelta64=None):
+def loadLonlat(pset, timedelta64=None):
     ds = xr.open_dataset(pset)
     timedelta64 = False
     lons = ds['lon'].data
@@ -131,13 +123,17 @@ def createTransition(pset, countGrid, timedelta64=None):
         final_tidx = times.shape[1]-1
     lonlat_init = np.dstack((lons[:,0], lats[:,0]))
     lonlat_final = np.dstack((lons[:,final_tidx], lats[:, final_tidx]))
+    ds.close()
+    return lonlat_init, lonlat_final
 
+
+def createTransition(pset, countGrid, timedelta64=None):
+    lonlat_init, lonlat_final = loadLonlat(pset, timedelta64)
     bindex_init = np.dstack((np.searchsorted(countGrid.lonBounds, lonlat_init[0,:,0]), np.searchsorted(countGrid.latBounds, lonlat_init[0,:,1])))[0]-1
     bindex_final = np.dstack((np.searchsorted(countGrid.lonBounds, lonlat_final[0,:,0]), np.searchsorted(countGrid.latBounds, lonlat_final[0,:,1])))[0]-1
     """2 issues:
     lonlats with NaN values will be put at index 60, 30 respectively. For these we don't want to look up the bindex
     """
-    ds.close()
 
     counter = np.zeros((countGrid.nIdx, countGrid.nIdx))
     N = bindex_init.shape[0]

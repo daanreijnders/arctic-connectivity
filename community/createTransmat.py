@@ -21,7 +21,7 @@ readdir_ice = '/data/oceanparcels/input_data/CESM/0.1_deg/control/ice/arctic/'
 readdir_ocean = '/data/oceanparcels/input_data/CESM/0.1_deg/control/ocean/arctic/'
 readdir_mesh = '/scratch/DaanR/fields/'
 
-fieldfile_ocean = 'daily_CESM_0.1degree_controlrun_year_300_arctic_region_timed.nc'
+fieldfile_ocean = 'daily_CESM_0.1degree_controlrun_year_300_arctic_timed_no_cord.nc'
 fieldfile_ice = 'monthly_icefields_CESM_0.1degree_controlrun_year_300_arctic.nc'
 meshfile = 'POP_grid_coordinates.nc'
 
@@ -59,10 +59,10 @@ fieldset = read_velocity_field(readdir_ocean+fieldfile_ocean, meshfile=readdir_m
 countG = comtools.countGrid(240, 40)
 particleG = comtools.particleGrid(3590, 590, 0)
 particleG.remove_on_land(fieldset)
-initCount = countG.countInit(particleG).T
+initCount = countG.particleCount(particleG).T
 
-mytransmat = comtools.createTransition('/data/oceanparcels/output_data/data_Daan/pset_control_3590x590.nc', countG)
+mytransmat = comtools.createTransition('/data/oceanparcels/output_data/data_Daan/pset_control_y300_P3590x590.nc', countG)
 # Create network from numpy array (adjacency matrix)
 G = nx.from_numpy_matrix(mytransmat.data, create_using=nx.DiGraph())
 # Export to Pajek (.net) format for further manual processing
-nx.write_pajek(G, 'out/graph_control_3590x590.net')
+nx.write_pajek(G, 'out/graph_control_y300_P3590x590_C240x40.net')

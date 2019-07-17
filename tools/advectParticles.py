@@ -61,6 +61,7 @@ def gridAdvection(fieldset, \
     return pset
 
 if __name__ == '__main__':
+    # For now, using control_y300
     fieldset = fieldsetter.read_velocity_field(readdir_ocean+fieldfile_ocean, meshfile=readdir_mesh+meshfile)  
     parser = argparse.ArgumentParser(description="Advect particles on a rectilinear grid.")
     parser.add_argument('plon', type=int, help='Number of particles spaced over longitudes.')

@@ -29,7 +29,7 @@ def set_circular_boundary(ax):
 #########################################
 def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
                     coast=True, land=False, polar=False, export=None, \
-                    units=None, t_end=None, title="", colormap=None, size=None, cbar=True):
+                    units=None, t_end=None, title="", colormap=None, size=None, cbar=True, vmax=None, vmin=None):
     # Extract Options
     minLat, maxLat = latRange
     minLon, maxLon = lonRange
@@ -70,9 +70,9 @@ def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
         colormap = 'viridis'
     # Plot field
     if polar: 
-        plotfield = ax.pcolormesh(lons, lats, data, transform=ccrs.PlateCarree(), clip_path=(circle_clip, ax.transAxes), cmap=colormap)
+        plotfield = ax.pcolormesh(lons, lats, data, transform=ccrs.PlateCarree(), clip_path=(circle_clip, ax.transAxes), cmap=colormap, vmax=vmax, vmin=vmin)
     else:
-        plotfield = ax.pcolormesh(lons, lats, data, transform=ccrs.PlateCarree(), cmap=colormap)
+        plotfield = ax.pcolormesh(lons, lats, data, transform=ccrs.PlateCarree(), cmap=colormap, vmax=vmax, vmin=vmin)
     
     # Colorbar
     divider = make_axes_locatable(ax)
