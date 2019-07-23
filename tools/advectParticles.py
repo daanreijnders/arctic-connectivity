@@ -66,16 +66,18 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Advect particles on a rectilinear grid.")
     parser.add_argument('plon', type=int, help='Number of particles spaced over longitudes.')
     parser.add_argument('plat', type=int, help='Number of particles spaced over latitudes.')
-#     parser.add_argument('clon', type=int, help='Number of counting intervals in longitudinal direction.')
-#     parser.add_argument('clat', type=int, help='Number of counting intervals in latitudinal direction.')
     parser.add_argument('-n', '--name', default='', type=str, help='Experiment name to save pset with.')
-    parser.add_argument('-mlat', '--minimumlat', default=60, type=str, help='minimumlat')
+    parser.add_argument('-d', '--days', default=30, type=int, help='Number of days used for advection.')
+    parser.add_argument('-odt', '--outputdt', default=12, type=int, help='Output timestep in hours')
+    parser.add_argument('-mlat', '--minimumlat', default=60, type=int, help='minimumlat')
     args = parser.parse_args()
     if args.name:
         name = args.name
     else:
         name = ''
-#    countG = comtools.countGrid(args.clon, args.clat)
     particleG = comtools.particleGrid(args.plon, args.plat, 0)
-#     psetTest = gridAdvection(fieldset, countG, particleG, experiment_name=f"{name}_P{args.plon}x{args.plat}")
-    psetTest = gridAdvection(fieldset, particleG, experiment_name=f"{name}_P{args.plon}x{args.plat}")
+    psetTest = gridAdvection(fieldset,\
+                             particleG,\
+                             runtime=delta(days=args.days),\
+                             outputdt = delta(hours=args.outputdt)
+                             experiment_name=f"{name}_P{args.plon}x{args.plat}_D{args.days}_ODT{args.outputdt}")
