@@ -69,15 +69,25 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--name', default='', type=str, help='Experiment name to save pset with.')
     parser.add_argument('-d', '--days', default=30, type=int, help='Number of days used for advection.')
     parser.add_argument('-odt', '--outputdt', default=12, type=int, help='Output timestep in hours')
-    parser.add_argument('-mlat', '--minimumlat', default=60, type=int, help='minimumlat')
+    parser.add_argument('--minlat', default=60.5, type=float, help='Minimum latitude for rectilinear particle initialization.')
+    parser.add_argument('--maxlat', default=89.5, type=float, help='Maximum latitude for rectilinear particle initialization')
+    parser.add_argument('--minlon', default=-179.5, type=float, help='Minimum longitude for rectilinear particle initialization')
+    parser.add_argument('--maxlon', default=179.5, type=float, help='Maximum latitude for rectilinear particle initialization.')
     args = parser.parse_args()
     if args.name:
         name = args.name
     else:
         name = ''
-    particleG = comtools.particleGrid(args.plon, args.plat, 0)
+        
+    particleG = comtools.particleGrid(args.plon,\
+                                      args.plat,\
+                                      0,\
+                                      minLat=args.minlat,\
+                                      maxLat=args.maxlat,\
+                                      minLon=args.minlon,\
+                                      maxLon=args.maxlon)
     psetTest = gridAdvection(fieldset,\
                              particleG,\
                              runtime=delta(days=args.days),\
                              outputdt = delta(hours=args.outputdt)
-                             experiment_name=f"{name}_P{args.plon}x{args.plat}_D{args.days}_ODT{args.outputdt}")
+                             experiment_name=f"{name}_P{args.plon}x{args.plat}_D{args.days}_ODT{args.outputdt}_LAT{args.minlat}-{args.maxlat}_LON{args.minlon}-{args.maxlon}")
