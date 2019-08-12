@@ -3,6 +3,12 @@ import math
 import argparse
 
 def sleep(seconds=0, minutes=0):
+    """
+    A timer to keep connections alive. Prints amount of minutes or seconds remaining while exececuting
+    Args:
+        seconds: 0 by default
+        minutes: 0 by default
+    """
     timer = 0
     timerMax = 60*minutes + seconds
     

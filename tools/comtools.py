@@ -1,3 +1,4 @@
+# Imports
 import numpy as np
 from scipy.interpolate import griddata
 import xarray as xr
@@ -7,15 +8,48 @@ import warnings
 import matplotlib.pyplot as plt
 import cartopy as cart
 import os
+from datetime import datetime
 
 class myGrid:
+    """
+    Grid defined by a latitude-longitude range and a number indicating the (discreet) amount of latitudes and longitudes used for dividing the grid.
+    
+    Parameters
+    ----------
+    nlat : int
+        number of latitudes.
+    nlon : int
+        number of longitudes.
+    minLat : float
+        minimum latitude of grid (southern boundary)
+    maxLat : float
+        maximum latitude of grid (northern boundary)
+    minLon : float
+        minimum longitude of grid (western boundary)
+    maxLon : float
+        maximum longitude of grid (eastern boundary)
+    
+    Attributes
+    ----------
+    nlat : int
+        number of latitudes
+    nlon : int
+        number of longitudes
+    dlat : float
+        distance at which latitudes are spaced
+    dlon : float
+        distance at which longitudes are spaced
+    """
     def __init__(self, nlon, nlat, minLat=60., maxLat=90., minLon=-180, maxLon=180):
         self.nlat = nlat
         self.nlon = nlon
         self.dlat = (maxLat - minLat)/nlat
-        self.dlon = 360/nlon
+        self.dlon = (maxLon - minLon)/nlon
         
 class countGrid(myGrid):
+    """
+    Grid used as spatial particle counting bins
+    """
     def __init__(self, nlon, nlat, minLat=60., maxLat=90., minLon=-180, maxLon=180):
         myGrid.__init__(self, nlon, nlat, minLat, maxLat, minLon, maxLon)
         self.lonOffset = self.dlon/2
@@ -57,6 +91,9 @@ class particleGrid(myGrid):
         self.lonlat_3d = np.dstack((self.lons, self.lats))
         self.initialParticleCount = self.countParticles()
         self.lonlat = np.array([np.reshape(self.lonlat_3d, (self.particleCount, 2))])
+        
+        if self.release_time:
+            self.release_times = [self.release_time for part in range(self.particleCount)]
         
         # Create labels
         self.lonlat_labels = np.arange(self.particleCount)
