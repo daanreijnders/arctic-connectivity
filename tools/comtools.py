@@ -77,7 +77,7 @@ class countGrid(myGrid):
                 self.community_map[i,j] = int(df['module'].loc[self.flatIdx[i,j]+1])
     
 class particleGrid(myGrid):
-    def __init__(self, nlon, nlat, release_time, minLat=60.5, maxLat=89.5, minLon=-179.5, maxLon=179.5):
+    def __init__(self, nlon, nlat, release_time=False, minLat=60.5, maxLat=89.5, minLon=-179.5, maxLon=179.5):
         myGrid.__init__(self, nlon, nlat, minLat, maxLat, minLon, maxLon)
         self.advected = False
         if release_time:
@@ -92,7 +92,7 @@ class particleGrid(myGrid):
         self.initialParticleCount = self.countParticles()
         self.lonlat = np.array([np.reshape(self.lonlat_3d, (self.particleCount, 2))])
         
-        if self.release_time:
+        if release_time:
             self.release_times = [self.release_time for part in range(self.particleCount)]
         
         # Create labels
@@ -142,6 +142,9 @@ class transMat:
         self.data = np.divide(self.counter, self.sums, out=np.zeros_like(self.sums), where=self.sums!=0)
         
 def loadLonlat(pset, timedelta64=None):
+    """
+    Extract latitude and longitude
+    """
     ds = xr.open_dataset(pset)
     timedelta64 = False
     lons = ds['lon'].data
@@ -165,16 +168,43 @@ def loadLonlat(pset, timedelta64=None):
 
 
 def createTransition(pset, countGrid, timedelta64=None):
-    lonlat_init, lonlat_final = loadLonlat(pset, timedelta64)
-    bindex_init = np.dstack((np.searchsorted(countGrid.lonBounds, lonlat_init[0,:,0]), np.searchsorted(countGrid.latBounds, lonlat_init[0,:,1])))[0]-1
-    bindex_final = np.dstack((np.searchsorted(countGrid.lonBounds, lonlat_final[0,:,0]), np.searchsorted(countGrid.latBounds, lonlat_final[0,:,1])))[0]-1
-    """2 issues:
-    lonlats with NaN values will be put at index 60, 30 respectively. For these we don't want to look up the bindex
     """
+    Create transition matrix from particle trajectories (from `pset`) given a `countGrid`
+    
+    Parameters
+    ----------
+    pset : parcels.ParticleSet
+        Particle set containing particle trajectories.
+    countGrid : comtools.countGrid
+        Grid containing cells on which the transition matrix is to be created.
+    timedelta64 : np.timedelta64
+        Timedelta relating to the elapsed time of the particle run for which the transition 
+        matrix is to be determined. Example: np.timedelta64(30,'D') for 30 days.
+        
+    Returns
+    -------
+    comtools.transmat
+        Transition matrix object, including attributes `counter` containing particle
+        tranistions, and  `sums` used for normalization.
+        
+    Issues
+    ------
+    lonlats with NaN values will be put at index 60, 30 respectively. 
+    For these we don't want to look up the bindex
+    """
+    
+    lonlat_init, lonlat_final = loadLonlat(pset, timedelta64)
+    # Find initial and final counting bin index for each particle
+    bindex_init = np.dstack((np.searchsorted(countGrid.lonBounds, lonlat_init[0,:,0]),
+                             np.searchsorted(countGrid.latBounds, lonlat_init[0,:,1])))[0]-1
+    bindex_final = np.dstack((np.searchsorted(countGrid.lonBounds, lonlat_final[0,:,0]), 
+                              np.searchsorted(countGrid.latBounds, lonlat_final[0,:,1])))[0]-1
 
     counter = np.zeros((countGrid.nIdx, countGrid.nIdx))
     N = bindex_init.shape[0]
+    # Constructing transition matrix from bin indices
     for i in range(N):
+        # Print progress
         print (f"\r Determining particle bins. {np.ceil(i/(N-1)*100)}%", end="")
         if (    bindex_final[i,0] < countGrid.flatIdx.shape[1] - 1
             and bindex_final[i,0] >= 0

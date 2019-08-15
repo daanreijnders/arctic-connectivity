@@ -12,7 +12,7 @@ sys.path.append('/home/students/4302001/arctic-connectivity/tools')
 sys.path.append('/Users/daanreijnders/surfdrive/Thesis/repo/tools')
 import comtools
 import fieldsetter
-import kernels
+import kernelCollection
 
 # Specify paths to velocity field and mesh
 # readdir_ocean = '/Users/daanreijnders/Datasets/'
@@ -64,7 +64,7 @@ def gridAdvection(fieldset, \
                                  particleGrid.lonlat[0,:,0], \
                                  particleGrid.lonlat[0,:,1], \
                                  time = particleGrid.release_times)
-    kernels = pset.Kernel(AdvectionRK4) + pset.Kernel(kernels.wrapLon)
+    kernels = pset.Kernel(AdvectionRK4) + pset.Kernel(kernelCollection.wrapLon)
     if os.path.exists(writedir+"pset_"+experiment_name+".nc"):
         warnings.warn("File already exists!")
     pfile = pset.ParticleFile(name = writedir+"pset_"+experiment_name, outputdt=outputdt)
@@ -77,7 +77,7 @@ def gridAdvection(fieldset, \
                  runtime = runtime, \
                  dt = dt, \
                  output_file = pfile, \
-                 recovery = {ErrorCode.ErrorOutOfBounds: kernels.deleteParticle})
+                 recovery = {ErrorCode.ErrorOutOfBounds: kernelCollection.deleteParticle})
     return pset
 
 # Argument parsing to execute from command line
@@ -94,10 +94,10 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--days', default=30, type=int, help='Number of days used for advection.')
     parser.add_argument('-dt', '--advectdt', default=5, type=int, help='Timestep for advection in minutes')
     parser.add_argument('-odt', '--outputdt', default=12, type=int, help='Output timestep in hours')
-    parser.add_argument('--minlat', default=60.5, type=float, help='Minimum latitude for rectilinear particle initialization.')
-    parser.add_argument('--maxlat', default=89.5, type=float, help='Maximum latitude for rectilinear particle initialization')
-    parser.add_argument('--minlon', default=-179.5, type=float, help='Minimum longitude for rectilinear particle initialization')
-    parser.add_argument('--maxlon', default=179.5, type=float, help='Maximum latitude for rectilinear particle initialization.')
+    parser.add_argument('--minlat', default=60.1, type=float, help='Minimum latitude for rectilinear particle initialization.')
+    parser.add_argument('--maxlat', default=89.9, type=float, help='Maximum latitude for rectilinear particle initialization')
+    parser.add_argument('--minlon', default=-179.9, type=float, help='Minimum longitude for rectilinear particle initialization')
+    parser.add_argument('--maxlon', default=179.9, type=float, help='Maximum latitude for rectilinear particle initialization.')
     args = parser.parse_args()
     if args.name:
         name = args.name
