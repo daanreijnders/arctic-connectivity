@@ -82,7 +82,7 @@ def gridAdvection(fieldset, \
 
 # Argument parsing to execute from command line
 if __name__ == '__main__':
-    # For now, using control_y300
+    # For now, using control_y300. Create options for different runs later.
     fieldset = fieldsetter.read_velocity_field(readdir_ocean+fieldfile_ocean, meshfile=readdir_mesh+meshfile) 
     
     parser = argparse.ArgumentParser(description="Advect particles on a rectilinear grid.")
@@ -114,6 +114,7 @@ if __name__ == '__main__':
                                       maxLat=args.maxlat,\
                                       minLon=args.minlon,\
                                       maxLon=args.maxlon)
+    particleG.remove_on_land(fieldset)
     pset_out = gridAdvection(fieldset,\
                              particleG,\
                              runtime=delta(days=args.days),\
