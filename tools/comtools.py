@@ -114,6 +114,7 @@ class particleGrid(myGrid):
                               self.lonlat[0,:,:], method='nearest')
         self.lonlat = self.lonlat[:, ~lonlatMask, :]
         self.removedParticleCount = self.countParticles()
+        self.release_times = [self.release_time for part in range(self.removedParticleCount)]
         # recreate labels
         self.lonlat_labels = np.arange(self.particleCount)
     
@@ -131,8 +132,9 @@ class particleGrid(myGrid):
                 plt.savefig(f'figures/{export}.png', dpi=300)
         return ax
     
-    def add_advected(self, pset):
-        lonlat_init, lonlat_final = loadLonlat(pset)
+    def add_advected(self, pset, timedelta64=None):
+        """Does not work well, since particles can be deleted throughout the run, causing concatenation to break."""
+        lonlat_init, lonlat_final = loadLonlat(pset, timedelta64)
         self.lonlat = np.concatenate((self.lonlat, lonlat_final), axis=0)
 
 class transMat:
