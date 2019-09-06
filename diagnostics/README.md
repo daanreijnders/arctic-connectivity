@@ -1,0 +1,1 @@
+This folder contains notebooks and images for verifying whether fields are loaded into parcels correctly, since this hasn't always been the case (see figures). The control run should be working fine now, though.

@@ -32,12 +32,12 @@ fieldset = fieldsetter.read_velocity_field(readdir_ocean+fieldfile_ocean, meshfi
 
 # Make sure the particleGrid corresponds to that of the run. It's needed for the initial particle count.
 countG = comtools.countGrid(240, 40)
-particleG = comtools.particleGrid(3590, 590, 0)
+particleG = comtools.particleGrid(3590, 590, release_time=datetime(2000,1,1))
 particleG.remove_on_land(fieldset)
 initCount = countG.particleCount(particleG).T
 
-mytransmat = comtools.createTransition('/data/oceanparcels/output_data/data_Daan/pset_control_y300_P3590x590_S2000-7-1_D30_DT5_ODT12_LAT60.5-89.5_LON-179.5-179.5.nc', countG)
+mytransmat = comtools.createTransition('/data/oceanparcels/output_data/data_Daan/pset_control_y300_P3590x590_S2000-1-1_D90_DT60_ODT12_LAT60.5-89.5_LON-179.5-179.5.nc', countG)
 # Create network from numpy array (adjacency matrix)
 G = nx.from_numpy_matrix(mytransmat.data, create_using=nx.DiGraph())
 # Export to Pajek (.net) format for further manual processing
-nx.write_pajek(G, 'out/graph_control_y300_P3590x590_S2000-7-1_D30_DT5_ODT12_LAT60.5-89.5_LON-179.5-179.5.nc.net')
+nx.write_pajek(G, 'out/graph_control_y300_P3590x590_S2000-1-1_D90_DT60_ODT12_LAT60.5-89.5_LON-179.5-179.5.nc.net')
