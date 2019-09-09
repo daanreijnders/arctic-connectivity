@@ -1,1 +1,1 @@
-This folder contains notebooks and images for verifying whether fields are loaded into parcels correctly, since this hasn't always been the case (see figures). The control run should be working fine now, though.
+This folder contains notebooks and images for verifying whether certain procedures are working correctly, such as whether fields are loaded into parcels correctly, or the influence of increasing the integration timestep in parcels.
