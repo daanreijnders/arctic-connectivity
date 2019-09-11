@@ -36,7 +36,7 @@ particleG = comtools.particleGrid(3590, 590, release_time=datetime(2000,1,1))
 particleG.remove_on_land(fieldset)
 initCount = countG.particleCount(particleG).T
 
-mytransmat = comtools.createTransition('/data/oceanparcels/output_data/data_Daan/pset_control_y300_P3590x590_S2000-1-1_D90_DT60_ODT12_LAT60.5-89.5_LON-179.5-179.5.nc', countG)
+mytransmat = comtools.createTransMat('/data/oceanparcels/output_data/data_Daan/pset_control_y300_P3590x590_S2000-1-1_D90_DT60_ODT12_LAT60.5-89.5_LON-179.5-179.5.nc', countG)
 # Create network from numpy array (adjacency matrix)
 G = nx.from_numpy_matrix(mytransmat.data, create_using=nx.DiGraph())
 # Export to Pajek (.net) format for further manual processing

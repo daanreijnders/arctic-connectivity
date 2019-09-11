@@ -70,11 +70,91 @@ class countGrid(myGrid):
         return count
     
     def load_communities(self, cluFile):
+        # Rename communityMap to communityIDs. the map should have color labels.
         df = pd.read_csv(cluFile, delimiter=" ").set_index('node')
-        self.community_map = np.zeros(self.flatIdx.shape) #maybe NaNs everywhere unless the node is in the csv file.
+        self.communityMap = np.zeros(self.flatIdx.shape) #maybe NaNs everywhere unless the node is in the csv file.
         for i in range(self.flatIdx.shape[0]):
             for j in range(self.flatIdx.shape[1]):
-                self.community_map[i,j] = int(df['module'].loc[self.flatIdx[i,j]+1])
+                self.communityMap[i,j] = int(df['module'].loc[self.flatIdx[i,j]+1])
+    
+    def find_adjacency(self, mode='Neumann'):
+        """
+        Create an adjacency list: for each node (grid cell), determine which nodes are bordering this node.
+        
+        Parameters
+        ----------
+        mode : string
+            Either 'Neumann' or 'Moore'. Indicates the pixel neighborhood used for determining
+            neighbors. The Von Neumann neighborhood only considers pixels touching the edges to
+            be neighbors, while the Moore neighborhood also considers pixels touching the 
+            corners.
+
+        Returns
+        -------
+        dict
+            Containing keys corresponding to community IDs and values being `set` objects
+            containing IDs of bordering communities.
+        """
+        # Construct empty adjacency dictionary
+        # Using dictionary so that labels coincide labels created by InfoMap, rather than being 
+        # indices, which might not coincide with labels.
+        self.adjacencyDict = {}
+        # Iterate over all cells
+        for i in range(self.flatIdx.shape[0]):
+            for j in range(self.flatIdx.shape[1]):
+                # Save current community in variable
+                currentCommunity = int(self.communityMap[i,j])
+                # If the current community doesn't have a key and value yet, add an empty
+                # set to the dictionary, with the key being the community ID.
+                if currentCommunity not in self.adjacencyDict:
+                    self.adjacencyDict[currentCommunity] = set()
+                self.adjacencyDict[currentCommunity].add(int(self.communityMap[i, j+1//self.flatIdx.shape[1]]))
+                self.adjacencyDict[currentCommunity].add(int(self.communityMap[i, j-1]))
+                # Careful at northern and southern boundaries. 
+                if i<self.flatIdx.shape[0]-1:
+                    self.adjacencyDict[currentCommunity].add(int(self.communityMap[i+1, j]))
+                    if mode == 'Moore':
+                        self.adjacencyDict[currentCommunity].add(int(self.communityMap[i+1, j+1]))
+                        self.adjacencyDict[currentCommunity].add(int(self.communityMap[i+1, j-1]))
+                if i>0:
+                    self.adjacencyDict[currentCommunity].add(int(self.communityMap[i-1, j]))
+                    if mode == 'Moore':
+                        self.adjacencyDict[currentCommunity].add(int(self.communityMap[i-1, j+1]))
+                        self.adjacencyDict[currentCommunity].add(int(self.communityMap[i-1, j-1]))
+        return self.adjacencyDict
+                
+    def color_communities(self, num_colors=4):
+        """Associate new colors to existing communities by using graph coloring.
+        
+        Parameters
+        ----------
+        num_colors : int
+            Number of colors that will be used for coloring the map. Currently, if `num_colors` is less than or 
+            equal to the maximum degree, `num_colors` is increased to maxDegree+1.
+
+        Returns
+        -------
+        np.array
+            2D array containing new community IDs, corresponding to different colors.
+        """
+        try:
+            self.communityNetwork = nx.Graph()
+            for community in self.adjacencyDict:
+                for neighbor in self.adjacencyDict[community]:
+                    self.communityNetwork.add_edge(community, neighbor)
+            # Remove self-loops
+            self.communityNetwork.remove_edges_from(self.communityNetwork.selfloop_edges())
+        except NameError:
+            raise RuntimeError('The counting grid does not yet have an adjacency dictionary for determining the coloring of communities. Try calling the `find_adjacency()` method first.')
+        maxDegree = len(nx.degree_histogram(self.communityNetwork))-1
+        if not nx.algorithms.planarity.check_planarity(self.communityNetwork)[0]:
+            print('Graph is not planar!')
+            if maxDegree >= num_colors:
+                num_colors = maxDegree+1
+                print(f'Using {maxDegree+1} colors instead.')
+        self.colorMapping = nx.coloring.equitable_color(self.communityNetwork, num_colors=num_colors)
+        self.recoloredCommunityMap = np.array([self.colorMapping[index] for index in self.communityMap.flatten()]).reshape(self.communityMap.shape)
+        return self.recoloredCommunityMap
     
 class particleGrid(myGrid):
     def __init__(self, nlon, nlat, release_time=False, minLat=60.5, maxLat=89.5, minLon=-179.5, maxLon=179.5):
@@ -169,7 +249,7 @@ def loadLonlat(pset, timedelta64=None):
     return lonlat_init, lonlat_final
 
 
-def createTransition(pset, countGrid, timedelta64=None):
+def create_transMat(pset, countGrid, timedelta64=None):
     """
     Create transition matrix from particle trajectories (from `pset`) given a `countGrid`
     
@@ -216,4 +296,3 @@ def createTransition(pset, countGrid, timedelta64=None):
             destIdx = countGrid.flatIdx[bindex_final[i,1], bindex_final[i,0]]
             counter[sourceIdx, destIdx] += 1
     return transMat(counter)
-

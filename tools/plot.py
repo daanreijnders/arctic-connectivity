@@ -75,13 +75,14 @@ def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
         plotfield = ax.pcolormesh(lons, lats, data, transform=ccrs.PlateCarree(), cmap=colormap, vmax=vmax, vmin=vmin)
     
     # Colorbar
-    divider = make_axes_locatable(ax)
-    ax_cb   = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
-    fig.add_axes(ax_cb)
-    cbar    = plt.colorbar(plotfield, cax=ax_cb)
-    # Set units
-    if units:
-        cbar.ax.set_ylabel(f"({str(units)})")
+    if cbar:
+        divider = make_axes_locatable(ax)
+        ax_cb   = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
+        fig.add_axes(ax_cb)
+        cbar    = plt.colorbar(plotfield, cax=ax_cb)
+        # Set units
+        if units:
+            cbar.ax.set_ylabel(f"({str(units)})")
     
     ax.set_title(title)
     # Export as figure
@@ -92,7 +93,7 @@ def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
             plt.savefig(f'figures/{export}', dpi=300)
         else:
             plt.savefig(f'figures/{export}.png', dpi=300)
-    plt.show()
+    return fig, ax
 
 def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, t_index=0, land=True, polar=False, vectorField=False, export=None, t_end=None, titleAttribute="", colormap=None):
     """This function creates a cartopy plot of the input field.
@@ -243,7 +244,7 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
             plt.savefig(f'figures/{export}', dpi=300)
         else:
             plt.savefig(f'figures/{export}.png', dpi=300)
-    plt.show()
+    return fig, ax
 
 
 class particleAnimation:
