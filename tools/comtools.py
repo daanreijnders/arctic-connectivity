@@ -114,12 +114,12 @@ class countGrid(myGrid):
                 if i<self.flatIdx.shape[0]-1:
                     self.adjacencyDict[currentCommunity].add(int(self.communityMap[i+1, j]))
                     if mode == 'Moore':
-                        self.adjacencyDict[currentCommunity].add(int(self.communityMap[i+1, j+1]))
+                        self.adjacencyDict[currentCommunity].add(int(self.communityMap[i+1, j+1//self.flatIdx.shape[1]]))
                         self.adjacencyDict[currentCommunity].add(int(self.communityMap[i+1, j-1]))
                 if i>0:
                     self.adjacencyDict[currentCommunity].add(int(self.communityMap[i-1, j]))
                     if mode == 'Moore':
-                        self.adjacencyDict[currentCommunity].add(int(self.communityMap[i-1, j+1]))
+                        self.adjacencyDict[currentCommunity].add(int(self.communityMap[i-1, j+1//self.flatIdx.shape[1]]))
                         self.adjacencyDict[currentCommunity].add(int(self.communityMap[i-1, j-1]))
         return self.adjacencyDict
                 
@@ -152,7 +152,8 @@ class countGrid(myGrid):
             if maxDegree >= num_colors:
                 num_colors = maxDegree+1
                 print(f'Using {maxDegree+1} colors instead.')
-        self.colorMapping = nx.coloring.equitable_color(self.communityNetwork, num_colors=num_colors)
+        #self.colorMapping = nx.coloring.equitable_color(self.communityNetwork, num_colors=num_colors)
+        self.colorMapping = nx.coloring.greedy_color(self.communityNetwork, strategy='largest_first')
         self.recoloredCommunityMap = np.array([self.colorMapping[index] for index in self.communityMap.flatten()]).reshape(self.communityMap.shape)
         return self.recoloredCommunityMap
     
@@ -225,10 +226,23 @@ class transMat:
         
 def loadLonlat(pset, timedelta64=None):
     """
-    Extract latitude and longitude
+    Extract latitude and longitude data from particleSet.
+    
+    Parameters
+    ----------
+    pset : str
+        string with path to ``parcels.ParticleSet`` output file
+    timedelta64 : np.timedelta64
+        relative timestamp to load data from pset at, relative to start time
+
+    Returns
+    -------
+    lonlat_init
+        np.array with initial longitude-latitude pairs
+    lonlat_final
+        np.array with final longitude-latitude pairs    
     """
     ds = xr.open_dataset(pset)
-    timedelta64 = False
     lons = ds['lon'].data
     lats = ds['lat'].data
     ids = ds['traj'].data

@@ -3,7 +3,28 @@ import xarray as xr
 import pandas as pd
 from parcels import (grid, Field, FieldSet, ParticleSet, JITParticle, ScipyParticle, AdvectionRK4, ErrorCode, ParticleFile, Variable, plotTrajectoriesFile)
 
-def read_velocity_field(fieldfiles, meshfile=None):
+def read_velocity_field(fieldfiles, meshfile=None, mode='pop', tindex='time', **kwargs):
+    """
+    Creates a parcels.FieldSet object from hydrodynamic data in a netCDF file.
+    
+    Parameters
+    ----------
+    fieldfiles : str
+        String pointing to hydrodynamic data.
+    
+    meshfile : str
+        String pointing to grid data. Use 'None' if grid data is stored in fieldfiles.
+        
+    mode : str
+        String indicating way of loading data: 'pop' for B-grid, 'netcdf' for A-grid.
+    
+    tindex : str
+        String indicating the name of the time dimension. Workaround for RCP8.5 files.
+    
+    Returns
+    ----------
+    parcels.FieldSet    
+    """
     if not meshfile:
         meshfile = fieldfiles
     filenames = {'U': {'lon': meshfile,
@@ -16,13 +37,16 @@ def read_velocity_field(fieldfiles, meshfile=None):
     variables = {'U': 'UVEL_5m',
                  'V': 'VVEL_5m'}
 
-    dimensions = {'U': {'time': 'time',
+    dimensions = {'U': {'time': tindex,
                         'lat': 'ULAT',
                         'lon': 'ULON'},
-                  'V': {'time': 'time',
+                  'V': {'time': tindex,
                         'lat': 'ULAT',
                         'lon': 'ULON'}}
-    fieldset = FieldSet.from_pop(filenames, variables, dimensions, allow_time_extrapolation=False)
+    if mode == 'pop':
+        fieldset = FieldSet.from_pop(filenames, variables, dimensions, allow_time_extrapolation=False, **kwargs)
+    if mode == 'netcdf':
+        fieldset = FieldSet.from_netcdf(filenames, variables, dimensions, allow_time_extrapolation=False, **kwargs)
     fieldset.U.vmax = 10;  fieldset.U.vmin = -10;  # set max of flow to 10 m/s
     fieldset.V.vmax = 10; fieldset.V.vmin = -10;
     
