@@ -88,8 +88,8 @@ def gridAdvection(fieldset,
                  recovery = {ErrorCode.ErrorOutOfBounds: kernelCollection.deleteParticle})
     return pset
 
-# Argument parsing to execute from command line
 if __name__ == '__main__':
+    # Argument parsing
     parser = argparse.ArgumentParser(description="Advect particles on a rectilinear grid.")
     parser.add_argument('run', type=str, help='Select which run to use. Either `rcp85` or `control`')
     parser.add_argument('plon', type=int, help='Number of particles spaced over longitudes.')
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     parser.add_argument('--maxlat', default=89.9, type=float, help='Maximum latitude for rectilinear particle initialization')
     parser.add_argument('--minlon', default=-179.9, type=float, help='Minimum longitude for rectilinear particle initialization')
     parser.add_argument('--maxlon', default=179.9, type=float, help='Maximum latitude for rectilinear particle initialization.')
-    parser.add_argument('--dland', action='store_true', help='Remove particles on land.')
+    parser.add_argument('--nodland', action='store_true', help='Do not remove particles on land.')
     args = parser.parse_args()
     if args.name:
         name = args.name
@@ -119,16 +119,16 @@ if __name__ == '__main__':
         readdir_ocean = readdir_ocean_control
         fieldfile_ocean = fieldfile_ocean_control
         tindex = 'time'
-    
+    # Read field
     fieldset = fieldsetter.read_velocity_field(readdir_ocean+fieldfile_ocean, 
                                                meshfile=readdir_mesh+meshfile, 
                                                tindex=tindex, 
                                                timestamps=timestamps)     
-        
+    # Read start date   
     start_year = int(args.start_date[0:4])
     start_month = int(args.start_date[4:6])
     start_day = int(args.start_date[6:8])
-    
+    # Create particle grid
     particleG = comtools.particleGrid(args.plon,\
                                       args.plat,\
                                       datetime(start_year, start_month, start_day),\
@@ -137,12 +137,20 @@ if __name__ == '__main__':
                                       minLon=args.minlon,\
                                       maxLon=args.maxlon)
     
-    if args.dland:
+    # Check whether land particles need to be removed
+    if not args.nodland:
         particleG.remove_on_land(fieldset)
+    # Name parsing
+    if len(name) > 0:
+        if name[-1] != '_':
+            name = name + '_'
+    if args.nodland:
+        name = name + 'nodelete_'
         
+    # Run
     pset_out = gridAdvection(fieldset,\
                              particleG,\
                              runtime=delta(days=args.days),\
                              dt = delta(minutes=args.advectdt),\
                              outputdt = delta(hours=args.outputdt),\
-                             experiment_name=f"{name}_R{args.run}_P{args.plon}x{args.plat}_S{start_year}-{start_month}-{start_day}_D{args.days}_DT{args.advectdt}_ODT{args.outputdt}_LAT{args.minlat}-{args.maxlat}_LON{args.minlon}-{args.maxlon}")
+                             experiment_name=f"{name}R{args.run}_P{args.plon}x{args.plat}_S{start_year}-{start_month}-{start_day}_D{args.days}_DT{args.advectdt}_ODT{args.outputdt}_LAT{args.minlat}-{args.maxlat}_LON{args.minlon}-{args.maxlon}")

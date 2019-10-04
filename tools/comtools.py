@@ -68,14 +68,45 @@ class countGrid(myGrid):
         if tindex == 0:
             self.initCount = count
         return count
-    
-    def load_communities(self, cluFile):
-        # Rename communityMap to communityIDs. the map should have color labels.
-        df = pd.read_csv(cluFile, delimiter=" ").set_index('node')
-        self.communityMap = np.zeros(self.flatIdx.shape) #maybe NaNs everywhere unless the node is in the csv file.
+   
+    def load_communities(self, comFile, parser = 'legacy'):
+        """
+        Load communities determined by a community detection algorithm
+        
+        Parameters
+        ----------
+        comFile : str
+            Filename of community file
+        parser : str
+            Parser to use
+        """
+        #----- START PARSERS -----#
+        if parser == 'legacy':
+            self.communityDF = pd.read_csv(comFile,  delimiter=" ").set_index('node')
+        if parser == 'clu':
+            with open(comFile) as cluFile:
+                clu = cluFile.read().split('\n')
+            self.codelength = float(clu[0].split(' ')[3])
+            header = clu[1].split(' ')[1:]
+            body = [line.split(' ') for line in clu[2:] if line is not '']
+            self.communityDF = pd.DataFrame(body, columns=header).astype({"node" : 'int',  "module" : 'int', "flow" : 'float' }).set_index("node")
+        if parser == 'tree':
+            with open(comFile) as treeFile:
+                tree = treeFile.read().split('\n')
+            self.codelength = float(tree[0].split(' ')[3])
+            header = tree[1].split(' ')[1:]
+            body = [line.split(' ') for line in tree[2:] if line is not '']
+            self.communityDF = pd.DataFrame(body, columns=header).drop(columns="name").rename(columns={'physicalId': 'node'})
+            self.communityDF['rank'] = self.communityDF['path'].map(lambda a: a.split(":")[-1])
+            self.communityDF['module'] = self.communityDF['path'].map(lambda a: a.split(":")[-2])
+            self.communityDF = self.communityDF.astype({"node" : "int",  "module" : "int", "flow" : "float"}).set_index("node")
+        #------ END PARSERS ------#
+        
+        communityID = np.zeros(self.flatIdx.shape) #maybe NaNs everywhere unless the node is in the csv file.
         for i in range(self.flatIdx.shape[0]):
             for j in range(self.flatIdx.shape[1]):
-                self.communityMap[i,j] = int(df['module'].loc[self.flatIdx[i,j]+1])
+                communityID[i,j] = int(self.communityDF['module'].loc[self.flatIdx[i,j]+1])
+        self.communityID = communityID
     
     def find_adjacency(self, mode='Neumann'):
         """
@@ -103,24 +134,24 @@ class countGrid(myGrid):
         for i in range(self.flatIdx.shape[0]):
             for j in range(self.flatIdx.shape[1]):
                 # Save current community in variable
-                currentCommunity = int(self.communityMap[i,j])
+                currentCommunity = int(self.communityID[i,j])
                 # If the current community doesn't have a key and value yet, add an empty
                 # set to the dictionary, with the key being the community ID.
                 if currentCommunity not in self.adjacencyDict:
                     self.adjacencyDict[currentCommunity] = set()
-                self.adjacencyDict[currentCommunity].add(int(self.communityMap[i, j+1//self.flatIdx.shape[1]]))
-                self.adjacencyDict[currentCommunity].add(int(self.communityMap[i, j-1]))
+                self.adjacencyDict[currentCommunity].add(int(self.communityID[i, j+1//self.flatIdx.shape[1]]))
+                self.adjacencyDict[currentCommunity].add(int(self.communityID[i, j-1]))
                 # Careful at northern and southern boundaries. 
                 if i<self.flatIdx.shape[0]-1:
-                    self.adjacencyDict[currentCommunity].add(int(self.communityMap[i+1, j]))
+                    self.adjacencyDict[currentCommunity].add(int(self.communityID[i+1, j]))
                     if mode == 'Moore':
-                        self.adjacencyDict[currentCommunity].add(int(self.communityMap[i+1, j+1//self.flatIdx.shape[1]]))
-                        self.adjacencyDict[currentCommunity].add(int(self.communityMap[i+1, j-1]))
+                        self.adjacencyDict[currentCommunity].add(int(self.communityID[i+1, j+1//self.flatIdx.shape[1]]))
+                        self.adjacencyDict[currentCommunity].add(int(self.communityID[i+1, j-1]))
                 if i>0:
-                    self.adjacencyDict[currentCommunity].add(int(self.communityMap[i-1, j]))
+                    self.adjacencyDict[currentCommunity].add(int(self.communityID[i-1, j]))
                     if mode == 'Moore':
-                        self.adjacencyDict[currentCommunity].add(int(self.communityMap[i-1, j+1//self.flatIdx.shape[1]]))
-                        self.adjacencyDict[currentCommunity].add(int(self.communityMap[i-1, j-1]))
+                        self.adjacencyDict[currentCommunity].add(int(self.communityID[i-1, j+1//self.flatIdx.shape[1]]))
+                        self.adjacencyDict[currentCommunity].add(int(self.communityID[i-1, j-1]))
         return self.adjacencyDict
                 
     def color_communities(self, num_colors=4):
@@ -154,8 +185,8 @@ class countGrid(myGrid):
                 print(f'Using {maxDegree+1} colors instead.')
         #self.colorMapping = nx.coloring.equitable_color(self.communityNetwork, num_colors=num_colors)
         self.colorMapping = nx.coloring.greedy_color(self.communityNetwork, strategy='largest_first')
-        self.recoloredCommunityMap = np.array([self.colorMapping[index] for index in self.communityMap.flatten()]).reshape(self.communityMap.shape)
-        return self.recoloredCommunityMap
+        self.colorID = np.array([self.colorMapping[index] for index in self.communityID.flatten()]).reshape(self.communityID.shape)
+        return self.colorID
     
 class particleGrid(myGrid):
     def __init__(self, nlon, nlat, release_time=False, minLat=60.5, maxLat=89.5, minLon=-179.5, maxLon=179.5):
