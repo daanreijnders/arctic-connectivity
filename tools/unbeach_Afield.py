@@ -10,10 +10,9 @@ Function creating the unbeach velocity for the CMEMS data (A-grid)
 import xarray as xr
 import numpy as np
 
-
-readdir_ocean = '/data/oceanparcels/input_data/CESM/0.1_deg/rcp8.5/ocean/arctic/'
+readdir_ocean = '/data/oceanparcels/input_data/CESM/0.1_deg/control/ocean/arctic/'
 readdir_mesh = '/scratch/DaanR/fields/'
-fieldfile_ocean = 'daily_CESM_0.1degree_rcp8.5run_years_2000-2010_arctic.nc'
+fieldfile_ocean = 'daily_CESM_0.1degree_controlrun_year_300_arctic_timed_no_cord.nc'
 meshfile = 'POP_grid_coordinates.nc'
 
 inputData = xr.open_dataset(readdir_ocean + fieldfile_ocean)
@@ -22,8 +21,8 @@ meshData = xr.open_dataset(readdir_mesh + meshfile)
 dataArrayLonF = meshData.ULON
 dataArrayLatF = meshData.ULAT
 
-U = np.array(inputData.UVEL_5m[0,0,:,:])
-V = np.array(inputData.VVEL_5m[0,0,:,:])
+U = np.array(inputData.UVEL_5m[0,:,:])
+V = np.array(inputData.VVEL_5m[0,:,:])
 
 U[np.isnan(U)] = 0
 V[np.isnan(V)] = 0
@@ -78,4 +77,4 @@ dataset[dataArrayLatF.name] = dataArrayLatF
 dataset[dataArrayUnBeachU.name] = dataArrayUnBeachU
 dataset[dataArrayUnBeachV.name] = dataArrayUnBeachV
 
-dataset.to_netcdf(path='CESM_POP_0.1degree_rcp8.5run_j1800_antibeach_vel.nc', engine='scipy')
+dataset.to_netcdf(path=readdir_ocean+'CESM_POP_0.1degree_control_j1800_antibeach_vel.nc', engine='scipy')

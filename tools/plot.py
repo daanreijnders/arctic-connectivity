@@ -27,9 +27,9 @@ def set_circular_boundary(ax):
     return circle
 
 #########################################
-def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
+def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
                     coast=True, land=False, polar=False, export=None, \
-                    units=None, t_end=None, title="", colormap=None, size=None, cbar=True, vmax=None, vmin=None):
+                    units=None, t_end=None, title="", colormap=None, size=None, cbar=True, **kwargs):
     # Extract Options
     minLat, maxLat = latRange
     minLon, maxLon = lonRange
@@ -70,9 +70,9 @@ def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
         colormap = 'viridis'
     # Plot field
     if polar: 
-        plotfield = ax.pcolormesh(lons, lats, data, transform=ccrs.PlateCarree(), clip_path=(circle_clip, ax.transAxes), cmap=colormap, vmax=vmax, vmin=vmin)
+        plotfield = ax.pcolormesh(lons, lats, data, transform=ccrs.PlateCarree(), clip_path=(circle_clip, ax.transAxes), cmap=colormap, **kwargs)
     else:
-        plotfield = ax.pcolormesh(lons, lats, data, transform=ccrs.PlateCarree(), cmap=colormap, vmax=vmax, vmin=vmin)
+        plotfield = ax.pcolormesh(lons, lats, data, transform=ccrs.PlateCarree(), cmap=colormap, **kwargs)
     
     # Colorbar
     if cbar:
@@ -90,9 +90,67 @@ def from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
         if not os.path.exists('figures'):
             os.makedirs('figures')
         if export[-4] == '.':
-            plt.savefig(f'figures/{export}', dpi=300)
+            plt.savefig(f'figures/{export}', dpi=300, bbox_inches='tight')
         else:
-            plt.savefig(f'figures/{export}.png', dpi=300)
+            plt.savefig(f'figures/{export}.png', dpi=300, bbox_inches='tight')
+    return fig, ax
+
+def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
+                         coast=True, land=False, polar=False, export=None, \
+                         title="", colormap=None, size=None, **kwargs):
+    # Extract Options
+    minLat, maxLat = latRange
+    minLon, maxLon = lonRange
+    if polar:
+        map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
+    else:
+        map_crs = ccrs.PlateCarree()
+    
+    # Build axes
+    if size:
+        fig     = plt.figure(figsize=size)
+    else:
+        fig     = plt.figure()
+    ax      = plt.axes(projection=map_crs)
+    
+    ax.set_extent((minLon,maxLon,minLat,maxLat), crs=ccrs.PlateCarree())
+    
+    # Set masks
+    if coast:
+        ax.coastlines()
+    if land:
+        ax.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
+    
+    # Add gridlines
+    if polar:
+        gl = ax.gridlines()
+    else: 
+        gl = ax.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
+        gl.xlabels_top   = False
+        gl.ylabels_right = False
+        gl.xformatter    = LONGITUDE_FORMATTER
+        gl.yformatter    = LATITUDE_FORMATTER
+    # Circular clipping
+    if polar:
+        circle_clip = set_circular_boundary(ax)
+    
+    if not colormap:
+        colormap = 'viridis'
+    # Plot field
+    if polar: 
+        plotfield = ax.scatter(lons, lats, transform=ccrs.PlateCarree(), clip_path=(circle_clip, ax.transAxes), cmap=colormap, **kwargs)
+    else:
+        plotfield = ax.scatter(lons, lats, transform=ccrs.PlateCarree(), cmap=colormap, **kwargs)
+    
+    ax.set_title(title)
+    # Export as figure
+    if export:
+        if not os.path.exists('figures'):
+            os.makedirs('figures')
+        if export[-4] == '.':
+            plt.savefig(f'figures/{export}', dpi=300, bbox_inches='tight')
+        else:
+            plt.savefig(f'figures/{export}.png', dpi=300, bbox_inches='tight')
     return fig, ax
 
 def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, t_index=0, land=True, polar=False, vectorField=False, export=None, t_end=None, titleAttribute="", colormap=None):
@@ -241,14 +299,14 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
         if not os.path.exists('figures'):
             os.makedirs('figures')
         if export[-4] == '.':
-            plt.savefig(f'figures/{export}', dpi=300)
+            plt.savefig(f'figures/{export}', dpi=300, bbox_inches='tight')
         else:
-            plt.savefig(f'figures/{export}.png', dpi=300)
+            plt.savefig(f'figures/{export}.png', dpi=300, bbox_inches='tight')
     return fig, ax
 
 
 class particleAnimation:
-    def create(pfile, field=None, extent=None, polar=False, subsample=None, margin=3, nbar=False, EEZ_mapping=None, barLength=100, titleAttribute='', mask=True, fps=24, ):
+    def create(pfile, field=None, extent=None, cbar=True, polar=False, times='flat', particle_subsample=1, margin=3, nbar=False, EEZ_mapping=None, barLength=100, titleAttribute='', mask=True, fps=24):
         """Create particle animations
         
         :param pfile: particleset.nc file
@@ -260,14 +318,14 @@ class particleAnimation:
         :param barLength: integer specifying maximum y-extent of barchart
         :param fps: frames per second of animation
         :param titleAttribute: string to extend the title of the plot with
-        :param extent: Tuple with (minlat, maxlat, minlon, maxlon) of plot
+        :param extent: Tuple with (minlon, maxlon, minlat, maxlat) of plot
         """
         # Load arrays from file
-        lon = np.ma.filled(pfile.variables['lon'], np.nan)
-        lat = np.ma.filled(pfile.variables['lat'], np.nan)
-        time = np.ma.filled(pfile.variables['time'], np.nan)
+        lon = np.ma.filled(pfile.variables['lon'][::particle_subsample], np.nan)
+        lat = np.ma.filled(pfile.variables['lat'][::particle_subsample], np.nan)
+        time = np.ma.filled(pfile.variables['time'][::particle_subsample], np.nan)
         if EEZ_mapping:
-            EEZ_evol = np.ma.filled(pfile.variables['z'], np.nan)
+            EEZ_evol = np.ma.filled(pfile.variables['z'][::particle_subsample], np.nan)
         mesh = pfile.attrs['parcels_mesh'] if 'parcels_mesh' in pfile.attrs else 'spherical'
         
         # Set projection
@@ -278,7 +336,7 @@ class particleAnimation:
         
         # Create figure
         fig     = plt.figure(figsize=(9,5))
-        particle_map = plt.subplot(projection=map_crs)  
+        ax      = plt.subplot(projection=map_crs)  
         
         # Find extent for plot
         if not extent:
@@ -290,14 +348,14 @@ class particleAnimation:
                 extent = (0, 360, minlat-margin, 90)
             else:
                 extent = (max(minlon-margin, -180), min(maxlon+margin, 180), max(minlat-margin, -90), min(maxlat+margin, 90))
-        particle_map.set_extent(extent, crs=map_crs)
+        ax.set_extent(extent, crs=ccrs.PlateCarree())
         
         # Add coastlines and land mask
-        particle_map.coastlines()
+        ax.coastlines()
         if mask:
-            particle_map.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
+            ax.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
         if polar:
-            circle_clip = set_circular_boundary(particle_map)
+            circle_clip = set_circular_boundary(ax)
             
         if field:
             fieldName = field.name
@@ -308,33 +366,44 @@ class particleAnimation:
             else:
                 colormap = 'viridis'
             field.fieldset.computeTimeChunk(field.grid.time[0], 1)
-            particle_map.pcolormesh(field.lon, field.lat, field.data[0,:,:], transform=map_crs, cmap=colormap, zorder=1)
+            ax.pcolormesh(field.lon, field.lat, field.data[0,:,:], transform=map_crs, cmap=colormap, zorder=1)
         else:
             fieldName = 'noField'
             
         # Draw gridlines
         if polar:
-            gl = particle_map.gridlines()
+            gl = ax.gridlines()
         else:
-            gl = particle_map.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
+            gl = ax.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
             gl.xlabels_top = False
             gl.ylabels_right = False
             gl.xformatter = LONGITUDE_FORMATTER
             gl.yformatter = LATITUDE_FORMATTER
 
         # Determine plotting time indices
-        plottimes = np.unique(time)
-        if isinstance(plottimes[0], (np.datetime64, np.timedelta64)):
-            plottimes = plottimes[~np.isnat(plottimes)]
+        if times == 'flat':
+            firstFullTrajectoryIdx = np.searchsorted(~np.isnat(time[:, -1]), True)
+            plottimes = time[firstFullTrajectoryIdx,:]
         else:
-            try:
-                plottimes = plottimes[~np.isnan(plottimes)]
-            except:
-                pass
+            plottimes = np.unique(time)
+            if isinstance(plottimes[0], (np.datetime64, np.timedelta64)):
+                plottimes = plottimes[~np.isnat(plottimes)]
+            else:
+                try:
+                    plottimes = plottimes[~np.isnan(plottimes)]
+                except:
+                    pass
         currtime = time == plottimes[0]
     
         # Create initial scatter plot of particles
-        scat   = particle_map.scatter(lon[currtime], lat[currtime], s=20, color='k', transform=ccrs.Geodetic(), zorder=10)
+        scat   = ax.scatter(lon[currtime], lat[currtime], c=lat[currtime], s=0.2, transform=ccrs.Geodetic(), zorder=10)
+        
+        if cbar:
+            divider = make_axes_locatable(ax)
+            ax_cb   = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
+            fig.add_axes(ax_cb)
+            cbar    = plt.colorbar(scat, cax=ax_cb)
+            cbar.ax.set_ylabel(f"Initial latitude")
         
         # Add bar chart
         if nbar and fieldName=='EEZ':
@@ -358,7 +427,7 @@ class particleAnimation:
                         pass
                 return currCount
             # Draw bar chart
-            divider = make_axes_locatable(particle_map)
+            divider = make_axes_locatable(ax)
             barplot = divider.append_axes("right", size=2, pad=1, axes_class=plt.Axes)
             bar    = barplot.barh(np.arange(nbar), EEZ_counter(currtime))
             barplot.set_xlim(0, barLength)
@@ -380,7 +449,7 @@ class particleAnimation:
         def animate(t):
             currtime = time == plottimes[t]
             scat.set_offsets(np.vstack((lon[currtime], lat[currtime])).transpose())
-            title.set_text('Particles in different EEZs at time ' + str(plottimes[t])[:13])
+            title.set_text('Particles at time ' + str(plottimes[t])[:13])
             if nbar:
                 for rect, width in zip(bar, EEZ_counter(currtime)):
                     rect.set_width(width)

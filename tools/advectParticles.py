@@ -1,3 +1,5 @@
+"""ONLY USE THIS FOR CONTROL RUN OR FIRST TEN YEARS OF RCP AND DON'T USE IT FOR ICOSAHEDRAL GRIDS"""
+
 # Imports
 import numpy as np
 from datetime import timedelta as delta
@@ -11,7 +13,7 @@ from parcels import (grid, Field, FieldSet, ParticleSet, JITParticle, ScipyParti
 
 sys.path.append('/home/students/4302001/arctic-connectivity/tools')
 sys.path.append('/Users/daanreijnders/surfdrive/Thesis/repo/tools')
-import comtools
+import community
 import fieldsetter
 import kernelCollection
 
@@ -63,10 +65,10 @@ def gridAdvection(fieldset,
     parcels.ParticleSet
         Contains particle trajectories.
     """
-    pset = ParticleSet.from_list(fieldset,
-                                 JITParticle,
-                                 particleGrid.lonlat[0,:,0],
-                                 particleGrid.lonlat[0,:,1],
+    pset = ParticleSet.from_list(fieldset = fieldset,
+                                 pclass = JITParticle,
+                                 lon = particleGrid.lonlat[0,:,0],
+                                 lat = particleGrid.lonlat[0,:,1],
                                  time = particleGrid.release_times,
                                  lonlatdepth_dtype = np.float64)
     kernels = pset.Kernel(AdvectionRK4) + pset.Kernel(kernelCollection.wrapLon)
@@ -148,9 +150,10 @@ if __name__ == '__main__':
         name = name + 'nodelete_'
         
     # Run
-    pset_out = gridAdvection(fieldset,\
+    pset_out = gridAdvection(fieldset,
                              particleG,\
                              runtime=delta(days=args.days),\
                              dt = delta(minutes=args.advectdt),\
                              outputdt = delta(hours=args.outputdt),\
                              experiment_name=f"{name}R{args.run}_P{args.plon}x{args.plat}_S{start_year}-{start_month}-{start_day}_D{args.days}_DT{args.advectdt}_ODT{args.outputdt}_LAT{args.minlat}-{args.maxlat}_LON{args.minlon}-{args.maxlon}")
+    pset_out.close()
