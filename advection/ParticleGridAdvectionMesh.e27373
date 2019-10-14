@@ -1,0 +1,63 @@
+/bin/sh: module: line 1: syntax error: unexpected end of file
+/bin/sh: error importing function definition for `BASH_FUNC_module'
+WARNING: Casting depth data to np.float32
+INFO: Compiled JITParticleAdvectionRK4wrapLon ==> /tmp/27373.1.long.q/parcels-23300/756d308254bb54902d830217c98cc10b_0.so
+INFO: Temporary output files are stored in /scratch/DaanR/psets/out-CRPHKLID.
+INFO: You can use "parcels_convert_npydir_to_netcdf /scratch/DaanR/psets/out-CRPHKLID" to convert these to a NetCDF file during the run.
+N/A% (0 of 7776000.0) |                  | Elapsed Time: 0:00:00 ETA:  --:--:--
+  2% (172800.0 of 7776000.0) |           | Elapsed Time: 0:02:07 ETA:   1:33:37
+  3% (259200.0 of 7776000.0) |           | Elapsed Time: 0:04:14 ETA:   3:04:17
+  4% (345600.0 of 7776000.0) |           | Elapsed Time: 0:06:22 ETA:   3:02:54
+  5% (432000.0 of 7776000.0) |           | Elapsed Time: 0:08:30 ETA:   3:01:40
+  6% (518400.0 of 7776000.0) |           | Elapsed Time: 0:10:38 ETA:   2:59:10
+  7% (604800.0 of 7776000.0) |           | Elapsed Time: 0:12:46 ETA:   2:57:09
+  8% (691200.0 of 7776000.0) |           | Elapsed Time: 0:14:54 ETA:   2:54:44
+ 10% (777600.0 of 7776000.0) |#          | Elapsed Time: 0:17:01 ETA:   2:51:42
+ 11% (864000.0 of 7776000.0) |#          | Elapsed Time: 0:19:08 ETA:   2:49:38
+ 12% (950400.0 of 7776000.0) |#          | Elapsed Time: 0:21:16 ETA:   2:48:30
+ 13% (1036800.0 of 7776000.0) |#         | Elapsed Time: 0:23:24 ETA:   2:45:56
+ 14% (1123200.0 of 7776000.0) |#         | Elapsed Time: 0:25:31 ETA:   2:43:29
+ 15% (1209600.0 of 7776000.0) |#         | Elapsed Time: 0:27:39 ETA:   2:42:05
+ 16% (1296000.0 of 7776000.0) |#         | Elapsed Time: 0:29:48 ETA:   2:40:21
+ 17% (1382400.0 of 7776000.0) |#         | Elapsed Time: 0:31:56 ETA:   2:38:21
+ 18% (1468800.0 of 7776000.0) |#         | Elapsed Time: 0:34:04 ETA:   2:35:24
+ 20% (1555200.0 of 7776000.0) |##        | Elapsed Time: 0:36:12 ETA:   2:33:45
+ 21% (1641600.0 of 7776000.0) |##        | Elapsed Time: 0:38:21 ETA:   2:32:28
+ 22% (1728000.0 of 7776000.0) |##        | Elapsed Time: 0:40:29 ETA:   2:29:06
+ 23% (1814400.0 of 7776000.0) |##        | Elapsed Time: 0:42:38 ETA:   2:28:27
+ 24% (1900800.0 of 7776000.0) |##        | Elapsed Time: 0:44:48 ETA:   2:27:22
+ 25% (1987200.0 of 7776000.0) |##        | Elapsed Time: 0:46:59 ETA:   2:26:20
+ 26% (2073600.0 of 7776000.0) |##        | Elapsed Time: 0:49:12 ETA:   2:25:56
+ 27% (2160000.0 of 7776000.0) |##        | Elapsed Time: 0:51:25 ETA:   2:24:07
+ 28% (2246400.0 of 7776000.0) |##        | Elapsed Time: 0:53:39 ETA:   2:22:57
+ 30% (2332800.0 of 7776000.0) |###       | Elapsed Time: 0:55:50 ETA:   2:18:01
+ 31% (2419200.0 of 7776000.0) |###       | Elapsed Time: 0:58:02 ETA:   2:16:01
+ 32% (2505600.0 of 7776000.0) |###       | Elapsed Time: 1:00:14 ETA:   2:14:34
+ 33% (2592000.0 of 7776000.0) |###       | Elapsed Time: 1:02:27 ETA:   2:13:22
+ 34% (2678400.0 of 7776000.0) |###       | Elapsed Time: 1:04:39 ETA:   2:09:41
+ 35% (2764800.0 of 7776000.0) |###       | Elapsed Time: 1:06:50 ETA:   2:06:18
+ 36% (2851200.0 of 7776000.0) |###       | Elapsed Time: 1:08:59 ETA:   2:02:59
+ 37% (2937600.0 of 7776000.0) |###       | Elapsed Time: 1:11:08 ETA:   2:00:13
+ 38% (3024000.0 of 7776000.0) |###       | Elapsed Time: 1:13:21 ETA:   2:01:41
+ 40% (3110400.0 of 7776000.0) |####      | Elapsed Time: 1:15:31 ETA:   1:57:20
+ 41% (3196800.0 of 7776000.0) |####      | Elapsed Time: 1:17:43 ETA:   1:56:36
+ 42% (3283200.0 of 7776000.0) |####      | Elapsed Time: 1:19:54 ETA:   1:53:11
+ 43% (3369600.0 of 7776000.0) |####      | Elapsed Time: 1:22:05 ETA:   1:51:41
+ 44% (3456000.0 of 7776000.0) |####      | Elapsed Time: 1:24:15 ETA:   1:47:45
+ 45% (3542400.0 of 7776000.0) |####      | Elapsed Time: 1:26:24 ETA:   1:45:16
+ 46% (3628800.0 of 7776000.0) |####      | Elapsed Time: 1:28:34 ETA:   1:44:44
+ 47% (3715200.0 of 7776000.0) |####      | Elapsed Time: 1:30:45 ETA:   1:42:37
+ 48% (3801600.0 of 7776000.0) |####      | Elapsed Time: 1:32:54 ETA:   1:38:54
+ 50% (3888000.0 of 7776000.0) |#####     | Elapsed Time: 1:35:03 ETA:   1:36:37
+ 51% (3974400.0 of 7776000.0) |#####     | Elapsed Time: 1:37:15 ETA:   1:36:16
+ 52% (4060800.0 of 7776000.0) |#####     | Elapsed Time: 1:39:23 ETA:   1:32:03
+ 53% (4147200.0 of 7776000.0) |#####     | Elapsed Time: 1:41:32 ETA:   1:29:54
+ 54% (4233600.0 of 7776000.0) |#####     | Elapsed Time: 1:43:42 ETA:   1:29:28
+ 55% (4320000.0 of 7776000.0) |#####     | Elapsed Time: 1:45:52 ETA:   1:26:32
+ 56% (4406400.0 of 7776000.0) |#####     | Elapsed Time: 1:48:01 ETA:   1:23:45
+ 57% (4492800.0 of 7776000.0) |#####     | Elapsed Time: 1:50:09 ETA:   1:21:09
+ 58% (4579200.0 of 7776000.0) |#####     | Elapsed Time: 1:52:28 ETA:   1:25:18
+ 60% (4665600.0 of 7776000.0) |######    | Elapsed Time: 1:54:50 ETA:   1:25:43
+ 61% (4752000.0 of 7776000.0) |######    | Elapsed Time: 1:57:08 ETA:   1:20:05
+ 62% (4838400.0 of 7776000.0) |######    | Elapsed Time: 1:59:22 ETA:   1:16:05
+ 63% (4924800.0 of 7776000.0) |######    | Elapsed Time: 2:01:43 ETA:   1:17:28

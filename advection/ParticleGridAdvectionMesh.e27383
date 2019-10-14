@@ -1,0 +1,20 @@
+/bin/sh: module: line 1: syntax error: unexpected end of file
+/bin/sh: error importing function definition for `BASH_FUNC_module'
+WARNING: Casting depth data to np.float32
+WARNING: Casting time data to np.float64
+WARNING: Casting field data to np.float32
+INFO: Compiled unbeachableParticleadvectionRK4wrapLonbeachTestingunBeaching ==> /tmp/27383.1.long.q/parcels-23300/d1be6a1c65289116807cb6e91f8c13dd_0.so
+INFO: Temporary output files are stored in /scratch/DaanR/psets/out-ECYBLQEQ.
+INFO: You can use "parcels_convert_npydir_to_netcdf /scratch/DaanR/psets/out-ECYBLQEQ" to convert these to a NetCDF file during the run.
+N/A% (0 of 7776000.0) |                                                                                                     | Elapsed Time: 0:00:00 ETA:  --:--:--
+  2% (172800.0 of 7776000.0) |##                                                                                            | Elapsed Time: 0:02:29 ETA:   1:49:32
+  3% (259200.0 of 7776000.0) |###                                                                                           | Elapsed Time: 0:04:59 ETA:   3:37:33
+  4% (345600.0 of 7776000.0) |####                                                                                          | Elapsed Time: 0:07:29 ETA:   3:35:09
+  5% (432000.0 of 7776000.0) |#####                                                                                         | Elapsed Time: 0:09:58 ETA:   3:31:12
+  6% (518400.0 of 7776000.0) |######                                                                                        | Elapsed Time: 0:12:28 ETA:   3:29:14
+  7% (604800.0 of 7776000.0) |#######                                                                                       | Elapsed Time: 0:14:58 ETA:   3:27:36
+  8% (691200.0 of 7776000.0) |########                                                                                      | Elapsed Time: 0:17:27 ETA:   3:24:15
+ 10% (777600.0 of 7776000.0) |#########                                                                                     | Elapsed Time: 0:19:56 ETA:   3:21:23
+ 11% (864000.0 of 7776000.0) |##########                                                                                    | Elapsed Time: 0:22:26 ETA:   3:19:08
+ 12% (950400.0 of 7776000.0) |###########                                                                                   | Elapsed Time: 0:24:56 ETA:   3:17:37
+ 13% (1036800.0 of 7776000.0) |############                                                                                 | Elapsed Time: 0:27:25 ETA:   3:14:33

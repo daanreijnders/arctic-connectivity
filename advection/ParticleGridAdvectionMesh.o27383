@@ -1,0 +1,651 @@
+Correct cell not found for (72.000000, 89.752207) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 0 0
+            new particle indices: (yi, xi) 598 905
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.3562813406316754e+00 5.8873414295516405e+01
+Correct cell not found for (72.000000, 89.814155) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 0 0
+            new particle indices: (yi, xi) 598 904
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.5740913701654455e+00 2.6038918142503814e+01
+Correct cell not found for (-144.000000, 89.969026) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 0 0
+            new particle indices: (yi, xi) 598 901
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 8.5084772607653625e-01 1.1835606778879793e+00
+Correct cell not found for (-71.812438, 89.972585) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9568798366350111e+00 2.2426106599761999e+00
+Correct cell not found for (-109.874008, 89.958024) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 2702
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.2167336327204177e-03 1.0001601305708416e+00
+Correct cell not found for (46.702337, 89.971991) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 899
+            new particle indices: (yi, xi) 598 2701
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 6.6678426579981009e-01 1.0006963444335362e+00
+Correct cell not found for (16.716902, 89.990162) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 899
+            new particle indices: (yi, xi) 598 900
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -4.5466991902645176e-01 4.7201180529604096e+00
+Correct cell not found for (-110.000000, 79.613439) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2948
+            new particle indices: (yi, xi) 598 2949
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0036119874949194e+00 9.9999991341991978e-01
+Correct cell not found for (70.011721, 89.756888) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 904
+            new particle indices: (yi, xi) 598 2696
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.1572648598335536e-01 1.0010446621910072e+00
+Correct cell not found for (-110.000000, 83.430048) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2856
+            new particle indices: (yi, xi) 598 2855
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.0677735255550256e-04 9.9999936593876093e-01
+Correct cell not found for (-110.000000, 83.430068) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2856
+            new particle indices: (yi, xi) 598 2855
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -3.7266317299845445e-04 9.9999966323448086e-01
+Correct cell not found for (70.026609, 89.821736) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 903
+            new particle indices: (yi, xi) 598 2697
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -7.5842144770825382e-01 1.0018223570321818e+00
+Correct cell not found for (-110.000000, 87.478041) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 838
+            new particle indices: (yi, xi) 598 2758
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -8.3138635336250603e-03 9.9999995434295597e-01
+Correct cell not found for (-110.000000, 86.934673) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2772
+            new particle indices: (yi, xi) 598 825
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -6.8694940895802767e-04 9.9999993908179152e-01
+Correct cell not found for (69.999983, 73.437623) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1306
+            new particle indices: (yi, xi) 598 1307
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0000044726835704e+00 9.9987436968526100e-01
+Correct cell not found for (70.057153, 89.818614) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 903
+            new particle indices: (yi, xi) 598 2697
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -6.8382128380015905e-01 1.0039568771370622e+00
+Correct cell not found for (70.027532, 89.792359) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 903
+            new particle indices: (yi, xi) 598 2697
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -5.9449711195405014e-02 1.0020974745577358e+00
+Correct cell not found for (70.008835, 89.762936) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 904
+            new particle indices: (yi, xi) 598 2696
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -3.5966660704883108e-01 1.0007723412534015e+00
+Correct cell not found for (69.999997, 73.437618) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1306
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9878086918564971e-05 9.9997916334530912e-01
+Correct cell not found for (70.000000, 73.437562) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1306
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.1168752715030407e-04 9.9999845357703376e-01
+Correct cell not found for (69.999998, 73.437614) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1306
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -4.8565874899306756e-05 9.9998750999054187e-01
+Correct cell not found for (69.999999, 73.437606) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1306
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.1801401968860390e-04 9.9999588544740048e-01
+Correct cell not found for (-110.000000, 87.228395) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2765
+            new particle indices: (yi, xi) 598 2764
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -4.5656094350939140e-03 9.9999998900806497e-01
+Correct cell not found for (-110.000000, 85.512261) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2805
+            new particle indices: (yi, xi) 598 2806
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0164506712469290e+00 9.9999999768902170e-01
+Correct cell not found for (-110.000000, 85.470146) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2806
+            new particle indices: (yi, xi) 598 791
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0081086797841421e+00 9.9999999451486665e-01
+Correct cell not found for (-110.000000, 79.659400) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2947
+            new particle indices: (yi, xi) 598 2948
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.1291885272430591e+00 9.9999999722645050e-01
+Correct cell not found for (70.000000, 73.398874) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1308
+            new particle indices: (yi, xi) 598 1307
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -6.9210987806293594e-04 9.9999994396041803e-01
+Correct cell not found for (69.999999, 73.437614) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1306
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -7.8946147756919980e-05 9.9999306733653848e-01
+Correct cell not found for (70.000000, 73.365369) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1308
+            new particle indices: (yi, xi) 598 1309
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0224230502901235e+00 9.9999996489681653e-01
+Correct cell not found for (-110.000000, 80.752802) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2920
+            new particle indices: (yi, xi) 598 2921
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0004924720914803e+00 9.9999837530217239e-01
+Correct cell not found for (70.000000, 73.434821) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1306
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -9.0049691751700675e-03 9.9999996409064429e-01
+Correct cell not found for (-110.000000, 81.291334) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2907
+            new particle indices: (yi, xi) 598 2908
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0461944008151483e+00 9.9999999752975399e-01
+Correct cell not found for (70.000000, 73.336160) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1309
+            new particle indices: (yi, xi) 598 1310
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0050748158896994e+00 9.9999999161300768e-01
+Correct cell not found for (70.000000, 73.351477) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1309
+            new particle indices: (yi, xi) 598 1308
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -3.7210603823251240e-02 9.9999999332297695e-01
+Correct cell not found for (-168.931712, 89.967928) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2699
+            new particle indices: (yi, xi) 598 901
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 7.6427460382884793e-01 1.0019137589010201e+00
+Correct cell not found for (70.000000, 73.308368) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1310
+            new particle indices: (yi, xi) 598 1311
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0054286874692948e+00 9.9999999493794800e-01
+Correct cell not found for (70.000000, 73.363368) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1308
+            new particle indices: (yi, xi) 598 1309
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0028895217368381e+00 9.9999962909995010e-01
+Correct cell not found for (70.000000, 73.435864) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1306
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -5.9484244372433551e-03 9.9999994887734589e-01
+Correct cell not found for (70.000000, 73.326307) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1309
+            new particle indices: (yi, xi) 598 1310
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0013249594344391e+00 9.9999965972967708e-01
+Correct cell not found for (-110.000000, 83.971258) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2842
+            new particle indices: (yi, xi) 598 2843
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0239642700675147e+00 9.9999999800340433e-01
+Correct cell not found for (70.000037, 78.685287) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1172
+            new particle indices: (yi, xi) 598 2426
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0000026496959671e+00 9.9983282924899253e-01
+Correct cell not found for (70.000000, 73.322229) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1310
+            new particle indices: (yi, xi) 598 1309
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.1342773396791890e-02 9.9999997964322240e-01
+Correct cell not found for (70.000000, 73.381157) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1308
+            new particle indices: (yi, xi) 598 1309
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0062179106853473e+00 9.9999999638152803e-01
+Correct cell not found for (70.000000, 73.426330) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1306
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.7180927014682709e-02 9.9999999294298381e-01
+Correct cell not found for (70.000000, 73.436008) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1306
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -8.1024944479695434e-03 9.9999995187657775e-01
+Correct cell not found for (-110.000000, 81.901676) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 705
+            new particle indices: (yi, xi) 598 704
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9214967030104027e-01 9.9999999891182312e-01
+Correct cell not found for (70.000000, 73.398670) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1308
+            new particle indices: (yi, xi) 598 1307
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.8724292680593158e-02 9.9999996697977456e-01
+Correct cell not found for (70.000000, 73.422403) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1306
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -7.8211091497794982e-02 9.9999999484294966e-01
+Correct cell not found for (70.000000, 73.347466) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1309
+            new particle indices: (yi, xi) 598 1308
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.6003093854509425e-02 9.9999999386582439e-01
+Correct cell not found for (70.000000, 73.435599) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1306
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -4.8834535024005407e-03 9.9999995864859914e-01
+Correct cell not found for (-138.926540, 89.962916) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2699
+            new particle indices: (yi, xi) 598 901
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 8.8400583263485633e-01 1.0028979204285475e+00
+Correct cell not found for (153.909670, 89.974149) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2699
+            new particle indices: (yi, xi) 598 901
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 6.1578128237600349e-01 1.0011411864611126e+00
+Correct cell not found for (92.727654, 89.984499) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2699
+            new particle indices: (yi, xi) 598 901
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 3.7221206193012157e-01 1.0039595997090562e+00
+Correct cell not found for (70.000000, 73.280175) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1311
+            new particle indices: (yi, xi) 598 1310
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -3.5894986004233305e-02 9.9999999055445521e-01
+Correct cell not found for (70.000000, 73.437933) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2291
+            new particle indices: (yi, xi) 598 2290
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.6621828315498090e-02 9.9999992580129682e-01
+Correct cell not found for (70.000000, 73.400944) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1308
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0027454524772719e+00 9.9999987821218528e-01
+Correct cell not found for (-110.000000, 77.130868) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 587
+            new particle indices: (yi, xi) 598 3011
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0017128061473652e+00 9.9999991457807980e-01
+Correct cell not found for (70.000000, 73.250281) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1312
+            new particle indices: (yi, xi) 598 1311
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -6.2230033581589820e-03 9.9999993152364541e-01
+Correct cell not found for (70.000000, 73.299460) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1310
+            new particle indices: (yi, xi) 598 1311
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0083114684123484e+00 9.9999999131444162e-01
+Correct cell not found for (70.000073, 80.834564) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1119
+            new particle indices: (yi, xi) 598 2479
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0000019912866815e+00 9.9974596035551366e-01
+Correct cell not found for (70.000000, 73.289985) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1310
+            new particle indices: (yi, xi) 598 1311
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0052662791040994e+00 9.9999992482920597e-01
+Correct cell not found for (70.000000, 73.325338) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1310
+            new particle indices: (yi, xi) 598 1309
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -3.5907534265339231e-03 9.9999987616293640e-01
+Correct cell not found for (70.000000, 73.372861) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1308
+            new particle indices: (yi, xi) 598 1309
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.1257896851678975e+00 9.9999999197527067e-01
+Correct cell not found for (70.000000, 73.435234) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1306
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -8.4922431024669568e-03 9.9999996282852410e-01
+Correct cell not found for (-110.000000, 81.323001) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2907
+            new particle indices: (yi, xi) 598 691
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0306387109084603e+00 9.9999999663712480e-01
+Correct cell not found for (70.000000, 73.426871) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1306
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -3.0527966816760420e-02 9.9999998979446880e-01
+Correct cell not found for (70.000000, 73.437571) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1307
+            new particle indices: (yi, xi) 598 1306
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.8348778001619369e-04 9.9999841607984952e-01
+Correct cell not found for (-110.000000, 81.367039) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 691
+            new particle indices: (yi, xi) 598 692
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0009429623263144e+00 9.9999954421283377e-01
+Correct cell not found for (70.000000, 73.338171) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1309
+            new particle indices: (yi, xi) 598 1310
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0740337471853358e+00 9.9999999305155329e-01
+Correct cell not found for (70.000000, 73.307381) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1310
+            new particle indices: (yi, xi) 598 1309
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.0500596713555592e-02 9.9999999449009891e-01
+Correct cell not found for (-22.075781, 89.992097) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9121172556417183e+00 3.8817978453208717e+00
+Correct cell not found for (-60.220061, 89.977439) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9537156274412066e+00 2.6206485722305275e+00
+Correct cell not found for (70.000000, 73.214558) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1313
+            new particle indices: (yi, xi) 598 1312
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -6.4827954771632095e-04 9.9999941702260342e-01
+Correct cell not found for (64.096716, 89.961568) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 899
+            new particle indices: (yi, xi) 598 2701
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 9.1496938613983458e-01 1.0010478805179599e+00
+Correct cell not found for (-26.209239, 89.990874) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9253080017510802e+00 3.7404564909252627e+00
+Correct cell not found for (-88.909323, 89.966247) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 2702
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.9349005887907320e-01 1.0054080097061775e+00
+Correct cell not found for (70.000000, 73.332440) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1309
+            new particle indices: (yi, xi) 598 1310
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0924814424456029e+00 9.9999998767736398e-01
+Correct cell not found for (-109.983225, 89.818138) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2703
+            new particle indices: (yi, xi) 598 897
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -6.7291745663353797e-01 1.0011632681280289e+00
+Correct cell not found for (-59.461728, 89.977887) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9566028274059786e+00 2.6445720261279910e+00
+Correct cell not found for (-108.081724, 89.958907) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 2702
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.9605826069795364e-02 1.0049923759409873e+00
+Correct cell not found for (70.000000, 73.291435) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1310
+            new particle indices: (yi, xi) 598 1311
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0131984904661018e+00 9.9999996396850366e-01
+Correct cell not found for (-27.779389, 89.989756) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9147763166598373e+00 3.6936949752144965e+00
+Correct cell not found for (-69.468633, 89.973836) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9626411554504359e+00 2.3176548247942255e+00
+Correct cell not found for (-79.631289, 89.969791) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 2702
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 2.7755695050944784e-01 1.0054327296088950e+00
+Correct cell not found for (-42.006736, 89.984116) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9261821462110331e+00 3.2234697643505230e+00
+Correct cell not found for (-109.956824, 89.760341) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2704
+            new particle indices: (yi, xi) 598 896
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.9757029773069360e-01 1.0038057965497009e+00
+Correct cell not found for (-28.997202, 89.989468) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9203775139597687e+00 3.6513894202682158e+00
+Correct cell not found for (-109.866552, 89.801926) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2703
+            new particle indices: (yi, xi) 598 897
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.8600172650084432e-01 1.0098091562070157e+00
+Correct cell not found for (70.000000, 73.245984) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1312
+            new particle indices: (yi, xi) 598 1311
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.0209903053931893e-02 9.9999998254632505e-01
+Correct cell not found for (70.000000, 73.274494) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1311
+            new particle indices: (yi, xi) 598 1310
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.9321946154022272e-02 9.9999999444938537e-01
+Correct cell not found for (70.000000, 73.299026) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1310
+            new particle indices: (yi, xi) 598 1311
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0055431019176135e+00 9.9999998925162148e-01
+Correct cell not found for (70.000000, 73.315190) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1310
+            new particle indices: (yi, xi) 598 1309
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.9037452332354614e-02 9.9999999111087379e-01
+Correct cell not found for (-109.958690, 89.754475) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2704
+            new particle indices: (yi, xi) 598 896
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.5799883876257539e-01 1.0037110066254549e+00
+Correct cell not found for (-109.905061, 89.792553) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2703
+            new particle indices: (yi, xi) 598 897
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -6.3395034126034713e-02 1.0072281345069261e+00
+Correct cell not found for (-57.807290, 89.978043) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9434009826755925e+00 2.7020278660087071e+00
+Correct cell not found for (-21.321700, 89.992617) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9167519452008470e+00 3.9043301803800512e+00
+Correct cell not found for (-45.814516, 89.983528) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9511504174199374e+00 3.0905032038210738e+00
+Correct cell not found for (-28.244110, 89.989543) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9144699313693907e+00 3.6786029629000727e+00
+Correct cell not found for (-40.149850, 89.984698) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9210357332375232e+00 3.2860963919437571e+00
+Correct cell not found for (-109.954279, 89.820856) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2703
+            new particle indices: (yi, xi) 598 897
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -7.3728565051883144e-01 1.0031408859370912e+00
+Correct cell not found for (-22.510708, 89.991620) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9052330197941962e+00 3.8707482978924923e+00
+Correct cell not found for (-88.358556, 89.966580) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 2702
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.9944027876025891e-01 1.0084086849692540e+00
+Correct cell not found for (-106.398812, 89.959840) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 2702
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 3.7854088880413451e-02 1.0121063563555450e+00
+Correct cell not found for (-43.525303, 89.983736) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9326779346020462e+00 3.1715278289021107e+00
+Correct cell not found for (-34.519754, 89.987168) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9221896465433166e+00 3.4698998373475529e+00
+Correct cell not found for (-62.263260, 89.976822) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9599406735458342e+00 2.5525725051310104e+00
+Correct cell not found for (-87.980956, 89.966962) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 2702
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 2.0469736180012330e-01 1.0142369766338408e+00
+Correct cell not found for (-60.028465, 89.977508) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9533864270729444e+00 2.6269725076827855e+00
+Correct cell not found for (-109.997704, 89.801870) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2703
+            new particle indices: (yi, xi) 598 897
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.8600746972873864e-01 1.0001688022614672e+00
+Correct cell not found for (70.000000, 73.252429) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1311
+            new particle indices: (yi, xi) 598 1312
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0031007894420410e+00 9.9999985647114686e-01
+Correct cell not found for (70.000000, 73.271222) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1311
+            new particle indices: (yi, xi) 598 1310
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -8.9341517857142852e-02 9.9999999572507670e-01
+Correct cell not found for (70.000000, 73.219368) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1312
+            new particle indices: (yi, xi) 598 1313
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0189232789294980e+00 9.9999998164949588e-01
+Correct cell not found for (-44.121659, 89.983524) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9337433382638241e+00 3.1516760679345546e+00
+Correct cell not found for (-61.364893, 89.976848) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9513757858534009e+00 2.5839742651356792e+00
+Correct cell not found for (-93.660479, 89.964289) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 2702
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.4921765383522284e-01 1.0019185938395043e+00
+Correct cell not found for (-110.000000, 79.249338) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 639
+            new particle indices: (yi, xi) 598 2957
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.2193659546073459e-04 9.9999963181875562e-01
+Correct cell not found for (70.000000, 73.309142) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1310
+            new particle indices: (yi, xi) 598 1309
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -9.8086804339092282e-02 9.9999999449009891e-01
+Correct cell not found for (70.000000, 73.246946) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1312
+            new particle indices: (yi, xi) 598 1311
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.6483389168901576e-02 9.9999998278088043e-01
+Correct cell not found for (-109.900467, 89.754070) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2704
+            new particle indices: (yi, xi) 598 896
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.4776264230345068e-01 1.0089538513292007e+00
+Correct cell not found for (-109.984854, 89.804654) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2703
+            new particle indices: (yi, xi) 598 897
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -3.5210570830213539e-01 1.0011019938972943e+00
+Correct cell not found for (70.000000, 73.281922) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 1311
+            new particle indices: (yi, xi) 598 1310
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -2.6717150344569694e-02 9.9999998807092838e-01
+Correct cell not found for (-110.000000, 79.734500) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2945
+            new particle indices: (yi, xi) 598 652
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.0117501517557397e+00 9.9999998644750898e-01
+Correct cell not found for (-50.107353, 89.981091) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9371231642263256e+00 2.9551070950196676e+00
+Correct cell not found for (-93.180295, 89.964428) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 2702
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 1.5319662073922694e-01 1.0008288645276440e+00
+Correct cell not found for (-77.613168, 89.970535) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 2702
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 2.9566788437813668e-01 1.0047658513916893e+00
+Correct cell not found for (-74.606899, 89.971805) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 2702
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 3.2363744880200213e-01 1.0077427777830181e+00
+Correct cell not found for (-109.941455, 89.767761) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2704
+            new particle indices: (yi, xi) 598 896
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -4.7399155890951711e-01 1.0050408277354979e+00
+Correct cell not found for (-76.355575, 89.971072) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 2702
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) 3.0741431057460927e-01 1.0061436308780598e+00
+Correct cell not found for (-61.409576, 89.976601) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 898
+            new particle indices: (yi, xi) 598 899
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -1.9459569389811147e+00 2.5839023481485159e+00
+Correct cell not found for (-109.985192, 89.761635) after 1000000 iterations
+Debug info: old particle indices: (yi, xi) 598 2704
+            new particle indices: (yi, xi) 598 896
+            Mesh 2d shape:  600 3600
+            Relative particle position:  (xsi, eta) -3.2864603491605354e-01 1.0012998501310033e+00
+Correct cell not found for (70.000000, 73.213841) after 1000000 ite
