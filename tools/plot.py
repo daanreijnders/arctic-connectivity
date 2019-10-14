@@ -248,7 +248,7 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
 
 
 class particleAnimation:
-    def create(pfile, field=None, margin=3, polar=False, nbar=False, EEZ_mapping=None, barLength=100, titleAttribute='', mask=True, fps=24):
+    def create(pfile, field=None, extent=None, polar=False, subsample=None, margin=3, nbar=False, EEZ_mapping=None, barLength=100, titleAttribute='', mask=True, fps=24, ):
         """Create particle animations
         
         :param pfile: particleset.nc file
@@ -256,16 +256,18 @@ class particleAnimation:
         :param margin: number of degrees of margin around maximum extent that particles have travelled
         :param polar: boolean to specify plot should be NorthPolarStereo
         :param nbar: specify number of bars in barchart. If False, no barchart is produced
-        :param eezIDmap: dataframe linking EEZ ID's to name
+        :param EEZ_mapping: dataframe linking EEZ IDs to name
         :param barLength: integer specifying maximum y-extent of barchart
         :param fps: frames per second of animation
         :param titleAttribute: string to extend the title of the plot with
+        :param extent: Tuple with (minlat, maxlat, minlon, maxlon) of plot
         """
         # Load arrays from file
         lon = np.ma.filled(pfile.variables['lon'], np.nan)
         lat = np.ma.filled(pfile.variables['lat'], np.nan)
         time = np.ma.filled(pfile.variables['time'], np.nan)
-        EEZ_evol = np.ma.filled(pfile.variables['z'], np.nan)
+        if EEZ_mapping:
+            EEZ_evol = np.ma.filled(pfile.variables['z'], np.nan)
         mesh = pfile.attrs['parcels_mesh'] if 'parcels_mesh' in pfile.attrs else 'spherical'
         
         # Set projection
@@ -279,21 +281,24 @@ class particleAnimation:
         particle_map = plt.subplot(projection=map_crs)  
         
         # Find extent for plot
-        minlon = np.amin(pfile.variables['lon'])
-        minlat = np.amin(pfile.variables['lat'])
-        maxlon = np.amax(pfile.variables['lon'])
-        maxlat = np.amax(pfile.variables['lat'])
-        if polar:
-            extent = (0, 360, minlat-margin, 90)
-        else:
-            extent = (max(minlon-margin, -180), min(maxlon+margin, 180), max(minlat-margin, -90), min(maxlat+margin, 90))
+        if not extent:
+            minlon = np.amin(pfile.variables['lon'])
+            minlat = np.amin(pfile.variables['lat'])
+            maxlon = np.amax(pfile.variables['lon'])
+            maxlat = np.amax(pfile.variables['lat'])
+            if polar:
+                extent = (0, 360, minlat-margin, 90)
+            else:
+                extent = (max(minlon-margin, -180), min(maxlon+margin, 180), max(minlat-margin, -90), min(maxlat+margin, 90))
         particle_map.set_extent(extent, crs=map_crs)
         
         # Add coastlines and land mask
         particle_map.coastlines()
         if mask:
             particle_map.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
-        
+        if polar:
+            circle_clip = set_circular_boundary(particle_map)
+            
         if field:
             fieldName = field.name
             if fieldName == 'EEZ':
@@ -308,11 +313,14 @@ class particleAnimation:
             fieldName = 'noField'
             
         # Draw gridlines
-        gl = particle_map.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
-        gl.xlabels_top = False
-        gl.ylabels_right = False
-        gl.xformatter = LONGITUDE_FORMATTER
-        gl.yformatter = LATITUDE_FORMATTER
+        if polar:
+            gl = particle_map.gridlines()
+        else:
+            gl = particle_map.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
+            gl.xlabels_top = False
+            gl.ylabels_right = False
+            gl.xformatter = LONGITUDE_FORMATTER
+            gl.yformatter = LATITUDE_FORMATTER
 
         # Determine plotting time indices
         plottimes = np.unique(time)

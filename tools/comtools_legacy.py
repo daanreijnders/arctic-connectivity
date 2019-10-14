@@ -69,7 +69,7 @@ class countGrid(myGrid):
             self.initCount = count
         return count
    
-    def load_communities(self, comFile, parser = 'legacy'):
+    def load_communities(self, comFile, parser = 'clu'):
         """
         Load communities determined by a community detection algorithm
         
