@@ -26,7 +26,7 @@ fieldfile_ice = 'monthly_icefields_CESM_0.1degree_controlrun_year_300_arctic.nc'
 meshfile = 'POP_grid_coordinates.nc'
 
 writedir = '/scratch/DaanR/psets/'
-
+psetdir = '/data/oceanparcels/output_data/data_Daan/psets/'
 # timestamps = [[np.datetime64('2000-01-09', 'D') + np.timedelta64(day, 'D') for day in range(4007)]]
 # fieldset = fieldsetter.read_velocity_field(readdir_ocean+fieldfile_ocean, 
 #                                            meshfile = readdir_mesh+meshfile,
@@ -35,9 +35,8 @@ writedir = '/scratch/DaanR/psets/'
 
 #pfile = xr.open_dataset('/data/oceanparcels/output_data/data_Daan/psets/pset_Rrcp85_Piconorth11_S2000-01-9_D90_DT20_ODT24_LAT60-90_LON-180-180.nc', decode_cf=True)
 # pfile = xr.open_dataset('/data/oceanparcels/output_data/data_Daan/psets/pset_Rcontrol_y300_DT5C_P3590x590_S2000-1-1_D30_DT5_ODT12_LAT60.5-89.5_LON-179.5-179.5.nc', decode_cf=True)
+psetname = 'pset_Rcontroly300_Piconorth11_S2000-01-1_D90_DT20_ODT24_LAT60-90_LON-180-180.nc'
 
-pfile = xr.open_dataset('/data/oceanparcels/output_data/data_Daan/psets/pset_Rrcp85_P3600x600_S2000-1-9_D90_DT20_ODT12_LAT60.1-89.9_LON-179.9-179.9.nc', decode_cf=True)
-
-
-plot.particleAnimation.create(pfile, particle_subsample=5, times='flat', fps=6, extent=(-180,180,60,90), polar=True, mask=False, titleAttribute='pset_Rrcp85_P3600x600_S2000-1-9_D90_DT20_ODT12_LAT60.1-89.9_LON-179.9-179.9.nc')
+pfile = xr.open_dataset(psetdir + psetname, decode_cf=True)
+plot.particleAnimation.create(pfile, particle_subsample=5, times='flat', fps=6, extent=(-180,180,60,90), polar=True, mask=False, titleAttribute=psetname)
 pfile.close()
