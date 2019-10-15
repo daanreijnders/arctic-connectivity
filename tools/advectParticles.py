@@ -1,5 +1,3 @@
-"""ONLY USE THIS FOR CONTROL RUN OR FIRST TEN YEARS OF RCP AND DON'T USE IT FOR ICOSAHEDRAL GRIDS"""
-
 # Imports
 import numpy as np
 from datetime import timedelta as delta
@@ -35,13 +33,14 @@ meshfile = 'POP_grid_coordinates.nc'
 writedir = '/scratch/DaanR/psets/'
     
 # Particle execution function
-def gridAdvection(fieldset,
-                  particleGrid,
+def advection(fieldset,
+                  particles,
                   experiment_name = '',
                   runtime = delta(days = 30),
                   dt = delta(minutes = 5),
                   outputdt = delta(hours = 12),
-                  overwrite = False):
+                  overwrite = False,
+                  antiBeach = True):
     """
     Advect particles on a `fieldset`. Original particle locations are stored in `particleGrid` object.
     
@@ -49,8 +48,8 @@ def gridAdvection(fieldset,
     ----------
     fieldset : parcels.fieldset
         Fieldset used for advecting particles
-    particleGrid: comtools.particleGrid
-        Grid containing initial distribution of particles
+    particle: community.particles
+        Object containing initial distribution of particles
     experiment_name : str
         Name to label experiment. Saved in filename of the `ParticleSet` output.
     runtime : datetime.timedelta
@@ -59,30 +58,50 @@ def gridAdvection(fieldset,
         Timestep of advection
     outputdt : datetime.timedelta
         Timestep between saved output.
+    overwrite : bool
+        Overwrite existing psets?
+    antiBeach : bool
+        Use anti-beaching kernels
         
     Returns
     -------
     parcels.ParticleSet
         Contains particle trajectories.
     """
+    if antiBeach:
+        assert hasattr(fieldset, 'UVunbeach'), "To unbeach, UVunbeach must be in fieldset!"
+        pclass = kernelCollection.unbeachableParticle
+    else:
+        pclass = JITParticle
     pset = ParticleSet.from_list(fieldset = fieldset,
-                                 pclass = JITParticle,
-                                 lon = particleGrid.lonlat[0,:,0],
-                                 lat = particleGrid.lonlat[0,:,1],
-                                 time = particleGrid.release_times,
+                                 pclass = pclass,
+                                 lon = particles.lonlat[0,:,0],
+                                 lat = particles.lonlat[0,:,1],
+                                 time = particles.releaseTimes,
                                  lonlatdepth_dtype = np.float64)
-    kernels = pset.Kernel(AdvectionRK4) + pset.Kernel(kernelCollection.wrapLon)
+    
+    # Set kernels
+    if antiBeach:
+        kernels = pset.Kernel(kernelCollection.advectionRK4) + pset.Kernel(kernelCollection.wrapLon) + pset.Kernel(kernelCollection.beachTesting) + pset.Kernel(kernelCollection.unBeaching)
+    else:
+        kernels = pset.Kernel(AdvectionRK4) + pset.Kernel(kernelCollection.wrapLon) 
+    
+    # Check if file exists    
     if os.path.exists(writedir+"pset_"+experiment_name+".nc"):
         if overwrite == True:
             warnings.warn("File already exists!")
         else:
             raise Exception('File already exists') 
+    
+    # Set ParticleFile
     pfile = pset.ParticleFile(name = writedir+"pset_"+experiment_name, outputdt=outputdt)
     pfile.add_metadata("dt", str(dt))
     pfile.add_metadata("Output dt", str(outputdt))
     pfile.add_metadata("Runtime", str(runtime))
-    pfile.add_metadata("Release time of first particle", str(particleGrid.release_times[0]))
+    pfile.add_metadata("Release time of first particle", str(particles.releaseTimes[0]))
     print(f"Run: Advecting particles for {runtime}")
+    
+    # Run
     pset.execute(kernels,
                  runtime = runtime,
                  dt = dt,
@@ -92,6 +111,7 @@ def gridAdvection(fieldset,
 
 if __name__ == '__main__':
     # Argument parsing
+    # """ONLY USE THIS FOR CONTROL RUN OR FIRST TEN YEARS OF RCP AND DON'T USE IT FOR ICOSAHEDRAL GRIDS"""
     parser = argparse.ArgumentParser(description="Advect particles on a rectilinear grid.")
     parser.add_argument('run', type=str, help='Select which run to use. Either `rcp85` or `control`')
     parser.add_argument('plon', type=int, help='Number of particles spaced over longitudes.')
@@ -131,7 +151,7 @@ if __name__ == '__main__':
     start_month = int(args.start_date[4:6])
     start_day = int(args.start_date[6:8])
     # Create particle grid
-    particleG = comtools.particleGrid(args.plon,\
+    particleG = community.particles(args.plon,\
                                       args.plat,\
                                       datetime(start_year, start_month, start_day),\
                                       minLat=args.minlat,\
@@ -150,7 +170,7 @@ if __name__ == '__main__':
         name = name + 'nodelete_'
         
     # Run
-    pset_out = gridAdvection(fieldset,
+    pset_out = advection(fieldset,
                              particleG,\
                              runtime=delta(days=args.days),\
                              dt = delta(minutes=args.advectdt),\

@@ -1,9 +1,14 @@
+"""
+@author: Daan Reijnders
+Function for easily setting fieldsets in Parcels, including CLI
+"""
+
 import numpy as np
 import xarray as xr
 import pandas as pd
-from parcels import (grid, Field, FieldSet, ParticleSet, JITParticle, ScipyParticle, AdvectionRK4, ErrorCode, ParticleFile, Variable, plotTrajectoriesFile)
+from parcels import (grid, Field, FieldSet, VectorField, ParticleSet, JITParticle, ScipyParticle, AdvectionRK4, ErrorCode, ParticleFile, Variable, plotTrajectoriesFile)
 
-def read_velocity_field(fieldfiles, meshfile=None, mode='pop', tindex='time', **kwargs):
+def read_velocity_field(fieldfiles, meshfile=None, antiBeach=None, mode='pop', tindex='time', **kwargs):
     """
     Creates a parcels.FieldSet object from hydrodynamic data in a netCDF file.
     
@@ -14,6 +19,9 @@ def read_velocity_field(fieldfiles, meshfile=None, mode='pop', tindex='time', **
     
     meshfile : str
         String pointing to grid data. Use 'None' if grid data is stored in fieldfiles.
+        
+    antiBeach : str
+        String pointing to file with antiBeach velocities. If `None`, no antiBeach velocity will be saved.
         
     mode : str
         String indicating way of loading data: 'pop' for B-grid, 'netcdf' for A-grid.
@@ -52,6 +60,15 @@ def read_velocity_field(fieldfiles, meshfile=None, mode='pop', tindex='time', **
     
     fieldset.computeTimeChunk(fieldset.U.grid.time[0], 1)
     fieldset.landMask = np.logical_or(fieldset.U.data[0,:,:]==-0.01, np.abs(fieldset.U.data[0,:,:])<0.0000001)
+    
+    if antiBeach:
+        dimensions = {'lon': 'ULON', 'lat': 'ULAT'}
+        U_unbeach = Field.from_netcdf(antiBeach, ('U_unbeach', 'unBeachU'), dimensions, fieldtype='U')
+        V_unbeach = Field.from_netcdf(antiBeach, ('V_unbeach', 'unBeachV'), dimensions, fieldtype='V')
+        fieldset.add_field(U_unbeach)
+        fieldset.add_field(V_unbeach)
+        UVunbeach = VectorField('UVunbeach', fieldset.U_unbeach, fieldset.V_unbeach)
+        fieldset.add_vector_field(UVunbeach)
     return fieldset
 
 # def add_ice_fields(fieldset, fieldfile, iceVars=['aice', 'hisnap', 'hi'], meshfile=None):
