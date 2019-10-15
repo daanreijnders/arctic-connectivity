@@ -190,14 +190,17 @@ class countBins:
     
     Parameters
     ----------
-    binType : str
-        Indicates the type of bin: `regular` or `icosahedral`
+    bindex : np.array
+        Array with Bin indices
     """
     def __init__(self, bindex):
         self.bindex = bindex
         
     @property
     def n(self):
+        """
+        Return number of bins
+        """
         return len(self.bindex)
     
     def load_communities(self, comFile, parser = 'clu'):
@@ -368,13 +371,26 @@ class regularCountBins(countBins):
         return self.adjacencyDict
     
 class transMat:
+    """
+    Basic instance of transition matrix object
+    
+    Attributes
+    ----------
+    counter : np.array
+        Square matrix with [i,j] indicating number particles from bin i to bin j
+    sums : np.array
+        Square tiled matrix, with all values in row i equal to the number of particles leaving bin i
+    data : np.array
+        Actual transition matrix, with [i,j] indicating probability for a particle
+        from bin i to bin j (`counter` divided by `sums`)
+    """
     def __init__(self, counter):
         self.counter = counter
         self.sums = np.tile(self.counter.sum(axis=1), (self.counter.shape[1],1)).T
         self.data = np.divide(self.counter, self.sums, out=np.zeros_like(self.sums), where=self.sums!=0)
 
     @classmethod
-    def from_pset(cls, pset, countBins, timedelta64 = None):
+    def from_pset(cls, pset, countBins, timedelta64 = None, **kwargs):
         """
         Create transition matrix from particle trajectories (from `pset`) given a `countBins`
 
@@ -402,14 +418,17 @@ class transMat:
         lonlatInit, lonlatFinal = lonlat_from_pset(pset, timedelta64)
         # Find initial and final counting bin index for each particle
         if countBins.binType == 'regular':
+            # Search for insertion bindex for initial and final lon and lat. -1 because we are using bounds
+            # so particles will be inserted on the next bindex. 
             bindexInit = np.dstack((np.searchsorted(countBins.lonBounds, lonlatInit[0,:,0]),
                                      np.searchsorted(countBins.latBounds, lonlatInit[0,:,1])))[0]-1
             bindexFinal = np.dstack((np.searchsorted(countBins.lonBounds, lonlatFinal[0,:,0]), 
                                       np.searchsorted(countBins.latBounds, lonlatFinal[0,:,1])))[0]-1
         elif countBins.binType == 'icosahedral':
             raise NotImplementedError("Transition matrices from icosahedral grids still need to be implemented")
-        
+        # `counter` counts particles from bindexInit to bindexFinal
         counter = np.zeros((countBins.n, countBins.n))
+        # shape of matrix is determined by in
         N = bindexInit.shape[0]
         # Constructing transition matrix from bin indices
         for i in range(N):
@@ -419,13 +438,14 @@ class transMat:
                 print (f"\r Determining particle bins. {int(np.ceil(i/(N-1)*100))}%", end="")
             # Only applies to regular grid
             if countBins.binType == 'regular':
+                # Test if lon and lat indices are not outside of the domain. Otherwise don't include them.
                 if (    bindexFinal[i,0] < countBins.gridShape[1] - 1
                     and bindexFinal[i,0] >= 0
                     and bindexFinal[i,1] < countBins.gridShape[0]
-                    and bindexFinal[i,1] >= 0): # moved outside domain
+                    and bindexFinal[i,1] >= 0): 
                     sourceIdx = countBins.bindex2D[bindexInit[i,1], bindexInit[i,0]]
                     destIdx = countBins.bindex2D[bindexFinal[i,1], bindexFinal[i,0]]
                     counter[sourceIdx, destIdx] += 1
             elif countBins.binType == 'icosahedral':
                 raise NotImplementedError("Transition matrices from icosahedral grids still need to be implemented")
-        return cls(counter)
+        return cls(counter, **kwargs)
