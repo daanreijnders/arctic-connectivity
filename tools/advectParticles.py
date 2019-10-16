@@ -40,7 +40,7 @@ def advection(fieldset,
                   dt = delta(minutes = 5),
                   outputdt = delta(hours = 12),
                   overwrite = False,
-                  antiBeach = True):
+                  antiBeach = False):
     """
     Advect particles on a `fieldset`. Original particle locations are stored in `particleGrid` object.
     
@@ -107,6 +107,7 @@ def advection(fieldset,
                  dt = dt,
                  output_file = pfile,
                  recovery = {ErrorCode.ErrorOutOfBounds: kernelCollection.deleteParticle})
+    pfile.close()
     return pset
 
 if __name__ == '__main__':
@@ -151,17 +152,17 @@ if __name__ == '__main__':
     start_month = int(args.start_date[4:6])
     start_day = int(args.start_date[6:8])
     # Create particle grid
-    particleG = community.particles(args.plon,\
-                                      args.plat,\
-                                      datetime(start_year, start_month, start_day),\
-                                      minLat=args.minlat,\
-                                      maxLat=args.maxlat,\
-                                      minLon=args.minlon,\
-                                      maxLon=args.maxlon)
+    particles = community.particles.from_regular_grid(args.plon,\
+                                                      args.plat,\
+                                                      releaseTime = datetime(start_year, start_month, start_day),\
+                                                      minLat=args.minlat,\
+                                                      maxLat=args.maxlat,\
+                                                      minLon=args.minlon,\
+                                                      maxLon=args.maxlon)
     
     # Check whether land particles need to be removed
     if not args.nodland:
-        particleG.remove_on_land(fieldset)
+        particles.remove_on_land(fieldset)
     # Name parsing
     if len(name) > 0:
         if name[-1] != '_':
@@ -171,9 +172,8 @@ if __name__ == '__main__':
         
     # Run
     pset_out = advection(fieldset,
-                             particleG,\
-                             runtime=delta(days=args.days),\
-                             dt = delta(minutes=args.advectdt),\
-                             outputdt = delta(hours=args.outputdt),\
-                             experiment_name=f"{name}R{args.run}_P{args.plon}x{args.plat}_S{start_year}-{start_month}-{start_day}_D{args.days}_DT{args.advectdt}_ODT{args.outputdt}_LAT{args.minlat}-{args.maxlat}_LON{args.minlon}-{args.maxlon}")
-    pset_out.close()
+                         particles,\
+                         runtime=delta(days=args.days),\
+                         dt = delta(minutes=args.advectdt),\
+                         outputdt = delta(hours=args.outputdt),\
+                         experiment_name=f"{name}R{args.run}_P{args.plon}x{args.plat}_S{start_year}-{start_month}-{start_day}_D{args.days}_DT{args.advectdt}_ODT{args.outputdt}_LAT{args.minlat}-{args.maxlat}_LON{args.minlon}-{args.maxlon}")
