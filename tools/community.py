@@ -10,6 +10,10 @@ from datetime import datetime
 import warnings
 import pickle
 import os
+try:
+    import stripy
+except ImportError:
+    print("Stripy is not available on this machine.")
 
 def lonlat_from_pset(pset, timedelta64=None):
     """
@@ -121,6 +125,24 @@ class particles:
         lon2D, lat2D = np.meshgrid(lonRange, latRange)
         return cls(lon2D.flatten(), lat2D.flatten(), **kwargs)
     
+    @classmethod
+    def from_pickle(cls, pickFile, lonKey='lons', latKey='lats', **kwargs):
+        """
+        Load longitudes and latitudes of particles from pickled dictionary
+        
+        Parameters
+        ----------
+        pickFile : str
+            Path to pickled dictionary
+        lonKey : str
+            Key for longitudes in dictionary
+        latKey : str
+            Key for latitudes in dictionary
+        """ 
+        with open(pickFile, 'rb') as pickFile:
+            lonlat_dict = pickle.load(pickFile)
+            return cls(lonlat_dict[lonKey], lonlat_dict[latKey], **kwargs)
+    
     def remove_on_land(self, fieldset):
         """
         Uses the fieldset.landMask to remove particles that are located on land (where u, v == 0 or -1)
@@ -190,17 +212,14 @@ class countBins:
     
     Parameters
     ----------
-    bindex : np.array
-        Array with Bin indices
+    binType : str
+        Indicates the type of bin: `regular` or `icosahedral`
     """
     def __init__(self, bindex):
         self.bindex = bindex
         
     @property
     def n(self):
-        """
-        Return number of bins
-        """
         return len(self.bindex)
     
     def load_communities(self, comFile, parser = 'clu'):
@@ -246,6 +265,40 @@ class countBins:
         for n in range(self.n):
             communityID[n] = int(self.communityDF['module'].loc[self.bindex[n]+1])
         self.communityID = communityID
+        
+    def color_communities(self, num_colors=4):
+        """Associate new colors to existing communities by using graph coloring.
+        
+        Parameters
+        ----------
+        num_colors : int
+            Number of colors that will be used for coloring the map. Currently, if `num_colors` is less than or 
+            equal to the maximum degree, `num_colors` is increased to maxDegree+1.
+
+        Returns
+        -------
+        np.array
+            Array containing new community IDs, corresponding to different colors.
+        """
+        try:
+            self.communityNetwork = nx.Graph()
+            for community in self.adjacencyDict:
+                for neighbor in self.adjacencyDict[community]:
+                    self.communityNetwork.add_edge(community, neighbor)
+            # Remove self-loops
+            self.communityNetwork.remove_edges_from(self.communityNetwork.selfloop_edges())
+        except NameError:
+            raise RuntimeError('The counting grid does not yet have an adjacency dictionary for determining the coloring of communities. Try calling the `find_adjacency()` method first.')
+        maxDegree = max([d for n, d in self.communityNetwork.degree()])
+        if not nx.algorithms.planarity.check_planarity(self.communityNetwork)[0]:
+            print('Graph is not planar!')
+            if maxDegree >= num_colors:
+                num_colors = maxDegree+1
+                print(f'Using {maxDegree+1} colors instead.')
+        #self.colorMapping = nx.coloring.equitable_color(self.communityNetwork, num_colors=num_colors)
+        self.colorMapping = nx.coloring.greedy_color(self.communityNetwork, strategy='largest_first')
+        self.colorID = np.array([self.colorMapping[index] for index in self.communityID.flatten()]).reshape(self.communityID.shape)
+        return self.colorID
         
     def color_communities(self, num_colors=4):
         """Associate new colors to existing communities by using graph coloring.
@@ -370,6 +423,62 @@ class regularCountBins(countBins):
                         self.adjacencyDict[currentCommunity].add(int(communityID2D[i-1, j-1]))
         return self.adjacencyDict
     
+class hexCountBins(countBins):
+    def __init__(self, refinement):
+        """
+        Basic instance of hexagonal counting bins. Hexagons should be composed of 6 triangles 
+        (5 in case of pentagon)
+        
+        Parameters
+        ----------
+        refinement : int
+            Number of mesh refinement levels to use.
+        """
+        self.ico = stripy.spherical_meshes.icosahedral_mesh(refinement_levels = refinement)
+        facepoints_lons, facepoints_lats = self.ico.face_midpoints()
+        self.icofaces = stripy.sTriangulation(np.hstack((self.ico.lons, facepoints_lons)), 
+                                              np.hstack((self.ico.lats, facepoints_lats)))
+        identifier = np.ones(self.icofaces.npoints)
+        identifier[self.ico.npoints:] = 0 # make index of last face 0
+        self.hexIds = self.icofaces.simplices[np.where(identifier[self.icofaces.simplices] == 1.0)]
+        self.hexIdx = np.arange(self.nHex)
+        
+    @property
+    def lons(self):
+        return np.degrees(self.icofaces.lons)
+
+    @property
+    def lats(self):
+        return np.degrees(self.icofaces.lats)
+
+    @property
+    def simplices(self):
+        return self.icofaces.simplices 
+    
+    @property
+    def nTriangles(self):
+        return self.icofaces.simplices.shape[0]
+    
+    @property
+    def nHex(self):
+        return np.unique(self.hexIds).shape[0]
+    
+    def particle_count(self, particles, tindex=0):
+        lons = np.radians(particles.lonlat[tindex,:,0])
+        lats = np.radians(particles.lonlat[tindex,:,1])
+        countTri = np.zeros(self.nTriangles)
+        countHex = np.zeros(self.nHex)
+        in_tri = self.icofaces.containing_triangle(lons, lats)
+        tri, counts = np.unique(in_tri, return_counts=True)
+        for tri, n in zip(vals, counts):
+            countTri[tri] = n
+            hexIdx = self.hexIds[tri]
+            countHex[hexIdx] += n            
+        if tindex == 0:
+            self.initCount = countTri
+            self.initCountHex = countHex
+        return countTri, countHex
+    
 class transMat:
     """
     Basic instance of transition matrix object
@@ -385,12 +494,21 @@ class transMat:
         from bin i to bin j (`counter` divided by `sums`)
     """
     def __init__(self, counter):
+        """
+        Initialize Transition Matrix using a counter matrix. 
+        Counter is a symmetric matrix with [i,j] corresponding to particles from bin i to bin j
+        
+        Parameters
+        ----------
+        counter : np.array
+            Square matrix with [i,j] indicating number particles from bin i to bin j
+        """
         self.counter = counter
         self.sums = np.tile(self.counter.sum(axis=1), (self.counter.shape[1],1)).T
         self.data = np.divide(self.counter, self.sums, out=np.zeros_like(self.sums), where=self.sums!=0)
 
     @classmethod
-    def from_pset(cls, pset, countBins, timedelta64 = None, **kwargs):
+    def from_pset(cls, pset, countBins, timedelta64 = None, ignore_empty = False, **kwargs):
         """
         Create transition matrix from particle trajectories (from `pset`) given a `countBins`
 
@@ -403,6 +521,8 @@ class transMat:
         timedelta64 : np.timedelta64
             Timedelta relating to the elapsed time of the particle run for which the transition 
             matrix is to be determined. Example: np.timedelta64(30,'D') for 30 days.
+        ignore_empty : bool
+            Only create a matrix using countBins that are not empty at the start and finish
 
         Returns
         -------
@@ -448,4 +568,9 @@ class transMat:
                     counter[sourceIdx, destIdx] += 1
             elif countBins.binType == 'icosahedral':
                 raise NotImplementedError("Transition matrices from icosahedral grids still need to be implemented")
+        if ignore_empty:
+            nonEmpty = np.logical_or(np.sum(counter, axis=0) > 0, np.sum(counter, axis=1) > 0)
+            countBins.nonEmptyBools = nonEmpty
+            countBins.nonEmptyBindex = countBins.bindex[nonEmpty]
+            counter = counter[nonEmpty]
         return cls(counter, **kwargs)
