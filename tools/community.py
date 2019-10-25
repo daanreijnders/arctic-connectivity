@@ -195,7 +195,7 @@ class particles:
             ax = plt.axes(projection = projection)
         else:
             ax = plt.axes(projection = cart.crs.PlateCarree())
-        ax.scatter(self.lonlat[tindex, :, 0], self.lonlat[tindex, :, 1], transform = cart.crs.Geodetic(), **kwargs)
+        ax.scatter(self.lonlat[tindex, :, 0], self.lonlat[tindex, :, 1], transform = cart.crs.PlateCarree(), **kwargs)
         ax.add_feature(cart.feature.COASTLINE)
         if export:
             if not os.path.exists('figures'):
