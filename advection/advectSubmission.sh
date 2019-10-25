@@ -21,7 +21,6 @@ source $HOME/start_conda.sh
 cd /home/students/4302001/arctic-connectivity/advection
 
 # COMMANDS HERE
-#python3 ../tools/advectParticles.py rcp85 3600 600 20000109 -d 30 -dt 20
+#python3 ../tools/advectParticles.py rcp85 360 60 20000109 -d 30 -dt 20
 #python3 ico_advection.py
-python3 ../tools/advectParticles.py rcp85 360 60 20000109 -d 30 -dt 20
-
+python3 wedge_advection.py

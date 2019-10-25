@@ -43,9 +43,9 @@ release_time = datetime(2000, 1, 9)
 refinement = 11
 # ––––––––––––––––––––––––– #
 
-fieldset = fieldsetter.read_velocity_field(readdir_ocean_control+fieldfile_ocean_control, 
-                                           meshfile = readdir_mesh+meshfile, 
-#                                            antiBeach = readdir_ocean_rcp85 + fieldfile_antibeach,
+fieldset = fieldsetter.read_velocity_field(readdir_ocean_rcp85 + fieldfile_ocean_rcp85, 
+                                           meshfile = readdir_mesh + meshfile, 
+                                           antiBeach = readdir_ocean_rcp85 + fieldfile_antibeach,
                                            timestamps=timestamps,
                                            tindex = 'record'
                                           ) 
@@ -61,11 +61,10 @@ particles.remove_on_land(fieldset)
 
 pset = advectParticles.advection(fieldset,
                                  particles,
-                                 experiment_name = f"pset_Rcontrol_beach_Piconorth{refinement}_S2000-01-9_D90_DT20_ODT24_LAT60-90_LON-180-180",
+                                 experiment_name = f"pset_Rrcp_nobeach_Piconorth{refinement}_S2000-01-9_D90_DT20_ODT24_LAT60-90_LON-180-180",
                                  runtime = runtime,
                                  dt = dt,
                                  outputdt = outputdt,
                                  overwrite = False,
-#                                  antiBeach = True
-                                 antiBeach = False,
+                                 antiBeach = True
                                 )

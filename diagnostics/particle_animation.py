@@ -35,7 +35,7 @@ psetdir = '/data/oceanparcels/output_data/data_Daan/psets/'
 
 #pfile = xr.open_dataset('/data/oceanparcels/output_data/data_Daan/psets/pset_Rrcp85_Piconorth11_S2000-01-9_D90_DT20_ODT24_LAT60-90_LON-180-180.nc', decode_cf=True)
 # pfile = xr.open_dataset('/data/oceanparcels/output_data/data_Daan/psets/pset_Rcontrol_y300_DT5C_P3590x590_S2000-1-1_D30_DT5_ODT12_LAT60.5-89.5_LON-179.5-179.5.nc', decode_cf=True)
-psetname = 'pset_Rrcp85_P360x60_S2000-1-9_D30_DT20_ODT12_LAT60.1-89.9_LON-179.9-179.9.nc'
+psetname = 'pset_Rrcp85_P2200x500_S2000-01-09_D30_DT0:_ODT1 _LAT60-85_LON-45-65.nc'
 
 pfile = xr.open_dataset(psetdir + psetname, decode_cf=True)
 plot.particleAnimation.create(pfile, particle_subsample=5, times='flat', fps=6, extent=(-180,180,60,90), polar=True, mask=False, titleAttribute=psetname)

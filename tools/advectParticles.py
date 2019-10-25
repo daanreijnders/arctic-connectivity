@@ -34,13 +34,13 @@ writedir = '/scratch/DaanR/psets/'
     
 # Particle execution function
 def advection(fieldset,
-                  particles,
-                  experiment_name = '',
-                  runtime = delta(days = 30),
-                  dt = delta(minutes = 5),
-                  outputdt = delta(hours = 12),
-                  overwrite = False,
-                  antiBeach = False):
+              particles,
+              experiment_name = '',
+              runtime = delta(days = 30),
+              dt = delta(minutes = 5),
+              outputdt = delta(hours = 12),
+              overwrite = False,
+              simple = False):
     """
     Advect particles on a `fieldset`. Original particle locations are stored in `particleGrid` object.
     
@@ -60,19 +60,19 @@ def advection(fieldset,
         Timestep between saved output.
     overwrite : bool
         Overwrite existing psets?
-    antiBeach : bool
-        Use anti-beaching kernels
+    simple : bool
+        Don't use anti-beaching kernel and don't freeze out-of-bound particles
         
     Returns
     -------
     parcels.ParticleSet
         Contains particle trajectories.
     """
-    if antiBeach:
-        assert hasattr(fieldset, 'UVunbeach'), "To unbeach, UVunbeach must be in fieldset!"
-        pclass = kernelCollection.unbeachableParticle
-    else:
+    if simple:
         pclass = JITParticle
+    else:
+        assert hasattr(fieldset, 'UVunbeach'), "To unbeach, UVunbeach must be in fieldset!"
+        pclass = kernelCollection.unbeachableBoundedParticle
     pset = ParticleSet.from_list(fieldset = fieldset,
                                  pclass = pclass,
                                  lon = particles.lonlat[0,:,0],
@@ -81,10 +81,13 @@ def advection(fieldset,
                                  lonlatdepth_dtype = np.float64)
     
     # Set kernels
-    if antiBeach:
-        kernels = pset.Kernel(kernelCollection.advectionRK4) + pset.Kernel(kernelCollection.wrapLon) + pset.Kernel(kernelCollection.beachTesting) + pset.Kernel(kernelCollection.unBeaching)
+    if simple:
+        kernels = pset.Kernel(AdvectionRK4) + pset.Kernel(kernelCollection.wrapLon)
     else:
-        kernels = pset.Kernel(AdvectionRK4) + pset.Kernel(kernelCollection.wrapLon) 
+        kernels = pset.Kernel(kernelCollection.advectionRK4) \
+                  + pset.Kernel(kernelCollection.beachTesting) \
+                  + pset.Kernel(kernelCollection.freezeOutOfBounds) \
+                  + pset.Kernel(kernelCollection.unBeaching)
     
     # Check if file exists    
     if os.path.exists(writedir+"pset_"+experiment_name+".nc"):
@@ -127,6 +130,8 @@ if __name__ == '__main__':
     parser.add_argument('--minlon', default=-179.9, type=float, help='Minimum longitude for rectilinear particle initialization')
     parser.add_argument('--maxlon', default=179.9, type=float, help='Maximum latitude for rectilinear particle initialization.')
     parser.add_argument('--nodland', action='store_true', help='Do not remove particles on land.')
+    parser.add_argument('--letbeach', action='store_true', help='Let particles beach.')
+
     args = parser.parse_args()
     if args.name:
         name = args.name
@@ -143,14 +148,22 @@ if __name__ == '__main__':
         fieldfile_ocean = fieldfile_ocean_control
         tindex = 'time'
     # Read field
-    fieldset = fieldsetter.read_velocity_field(readdir_ocean+fieldfile_ocean, 
-                                               meshfile=readdir_mesh+meshfile, 
-                                               tindex=tindex, 
-                                               timestamps=timestamps)     
+    if not letbeach:
+        fieldset = fieldsetter.read_velocity_field(readdir_ocean+fieldfile_ocean, 
+                                                   meshfile=readdir_mesh+meshfile, 
+                                                   tindex=tindex,
+                                                   antiBeach = readdir_ocean_rcp85 + fieldfile_antibeach,
+                                                   timestamps=timestamps)
+    else:
+        fieldset = fieldsetter.read_velocity_field(readdir_ocean+fieldfile_ocean, 
+                                                   meshfile=readdir_mesh+meshfile, 
+                                                   tindex=tindex, 
+                                                   timestamps=timestamps)     
     # Read start date   
     start_year = int(args.start_date[0:4])
     start_month = int(args.start_date[4:6])
     start_day = int(args.start_date[6:8])
+    
     # Create particle grid
     particles = community.particles.from_regular_grid(args.plon,\
                                                       args.plat,\
@@ -169,6 +182,8 @@ if __name__ == '__main__':
             name = name + '_'
     if args.nodland:
         name = name + 'nodelete_'
+    if args.letbeach:
+        name = name + 'beach'
         
     # Run
     pset_out = advection(fieldset,

@@ -14,6 +14,34 @@ try:
     import stripy
 except ImportError:
     print("Stripy is not available on this machine.")
+    
+def get_cartesian(lon, lat, R=1, mode='rad', ):
+    """
+    Convert spherical coordinates to cartesian coordinates.
+    
+    Parameters
+    ----------
+    lon : float, np.array
+        longitude coordinate(s)
+    lat : float, np.array
+        latitude coordinate(s)
+    R : int, float
+        radius of sphere
+    mode : str
+        Either 'rad' or 'deg', indicating whether coordinates are supplied
+        in radians or degrees respectively.
+        
+    Returns
+    -------
+    x, y, z : (float, float, float)
+        Cartesian coordinates
+    """
+    if mode=='deg':
+        lat, lon = np.radians(lat), np.radians(lon)
+    x = R * np.cos(lat) * np.cos(lon)
+    y = R * np.cos(lat) * np.sin(lon)
+    z = R *np.sin(lat)
+    return x, y, z
 
 def lonlat_from_pset(pset, timedelta64=None):
     """
@@ -69,7 +97,8 @@ class particles:
     lons : np.array
         list of longitudes (in degrees)
     lonlat : np.ndarray
-        2D array holding pairs of latitude and longitude of each particle
+        3D array holding pairs of latitude and longitude of each particle. 
+        First index corresponds to time, second to longitude, third to latitude.
     n : int
         number of gridpoints
     idx : np.ndarray
@@ -195,7 +224,7 @@ class particles:
             ax = plt.axes(projection = projection)
         else:
             ax = plt.axes(projection = cart.crs.PlateCarree())
-        ax.scatter(self.lonlat[tindex, :, 0], self.lonlat[tindex, :, 1], transform = cart.crs.PlateCarree(), **kwargs)
+        ax.scatter(self.lonlat[tindex, :, 0], self.lonlat[tindex, :, 1], transform = cart.crs.Geodetic(), **kwargs)
         ax.add_feature(cart.feature.COASTLINE)
         if export:
             if not os.path.exists('figures'):
@@ -213,7 +242,7 @@ class countBins:
     Parameters
     ----------
     binType : str
-        Indicates the type of bin: `regular` or `icosahedral`
+        Indicates the type of bin: `regular` or `hexagonal`
     """
     def __init__(self, bindex):
         self.bindex = bindex
@@ -424,60 +453,311 @@ class regularCountBins(countBins):
         return self.adjacencyDict
     
 class hexCountBins(countBins):
-    def __init__(self, refinement):
+    """
+    Basic instance of hexagonal counting bins. 
+    Hexagons are generated from the Voronoi diagram of refined icosahedral grids.
+    
+    Attributes
+    ----------
+    bintype : str
+        Type of bin ('hexagonal')
+    points : np.array
+        (N x 3) dimensional array containing cartesian (x, y, z)
+        coordinates of the vertices of the generating triangulation.
+    lons : np.array
+        N longitudes (degrees) of vertices of the generating triangulation.
+    lats : np.array
+        N latitudes (degrees) of vertices of the generating triangulation
+    vertexIndices : np.array
+        N indices of the vertices
+    simplices : np.array
+        N dimensional array holding tuples of length 3, holding the indices
+        of the vertices of each triangle in the generating triangulation
+    """
+    def __init__(self, points, lons, lats, vertexIndices, simplices):
         """
         Basic instance of hexagonal counting bins. Hexagons should be composed of 6 triangles 
         (5 in case of pentagon)
         
         Parameters
         ----------
-        refinement : int
-            Number of mesh refinement levels to use.
+        points : np.array
+            (N x 3) dimensional array containing cartesian (x, y, z)
+            coordinates of the vertices of the generating triangulation.
+        lons : np.array
+            N longitudes (degrees) of vertices of the generating triangulation.
+        lats : np.array
+            N latitudes (degrees) of vertices of the generating triangulation
+        vertexIndices : np.array
+            N indices of the vertices
+        simplices : np.array
+            N dimensional array holding tuples of length 3, holding the indices
+            of the vertices of each triangle in the generating triangulation
         """
-        self.ico = stripy.spherical_meshes.icosahedral_mesh(refinement_levels = refinement)
-        facepoints_lons, facepoints_lats = self.ico.face_midpoints()
-        self.icofaces = stripy.sTriangulation(np.hstack((self.ico.lons, facepoints_lons)), 
-                                              np.hstack((self.ico.lats, facepoints_lats)))
-        identifier = np.ones(self.icofaces.npoints)
-        identifier[self.ico.npoints:] = 0 # make index of last face 0
-        self.hexIds = self.icofaces.simplices[np.where(identifier[self.icofaces.simplices] == 1.0)]
-        self.hexIdx = np.arange(self.nHex)
+        self.binType = 'hexagonal'
+        self.points = points
+        self.lons = lons
+        self.lats = lats
+        self.vertexIndices = vertexIndices
+        self.simplices = simplices
         
     @property
-    def lons(self):
-        return np.degrees(self.icofaces.lons)
+    def n(self):
+        """
+        Returns
+        -------
+        Number of points in the triangulation
+        """
+        if hasattr(self, "sv"):
+            return self.sv.points.shape[0]
+        else:
+            return self.points.shape[0]
+    
+    @classmethod
+    def from_stripy(cls, refinement):
+        """
+        Create a hexCountBins` instance through a spherical 
+        icosahedral mesh obtained using `stripy`.
+        
+        Parameters
+        ----------
+        refinement : int
+            Refinement level of the mesh. The mesh is recursively refined through bisection
+            of the edges
+        
+        Returns
+        -------
+        bins : hexCountBins
+            hexCountBins instance
+        """
+        try:
+            ico = stripy.spherical_meshes.icosahedral_mesh(refinement_levels = refinement)
+            bins = cls(ico.points,
+                       np.degrees(ico.lons), 
+                       np.degrees(ico.lats),
+                       ico._permutation,
+                       ico.simplices)
+            return bins
+        except NameError:
+            raise NameError("Has the `stripy` module been imported?")
+        
+    def calculate_neighbors(self):
+        """
+        Create a dictionary with indices of neighbors for each vertex (key)
+        in the generating triangulation.
+        """
+        self.neighbors = {}
+        for vertex in self.vertexIndices:
+            self.neighbors[vertex] = set()
 
-    @property
-    def lats(self):
-        return np.degrees(self.icofaces.lats)
-
-    @property
-    def simplices(self):
-        return self.icofaces.simplices 
+        # For each simplex, fill dictionary with simplex and neighbor information
+        for simplex in self.simplices:
+            self.neighbors[simplex[0]].add(simplex[1])
+            self.neighbors[simplex[0]].add(simplex[2])
+            self.neighbors[simplex[1]].add(simplex[0])
+            self.neighbors[simplex[1]].add(simplex[2])
+            self.neighbors[simplex[2]].add(simplex[0])
+            self.neighbors[simplex[2]].add(simplex[1])
     
-    @property
-    def nTriangles(self):
-        return self.icofaces.simplices.shape[0]
+    def calculate_voronoi(self, mask = None, innerMaskLevel=0, outerMaskLevel = 0):
+        """
+        Calculate a voronoi diagram from the generating triangulation.
+        Uses the `scipy.spatial.SphericalVoronoi()` function.
+        
+        Parameters
+        ----------
+        mask : hexMask
+            Mask to apply to the points used for generating the diagram.
+            This can significantly reduce calculation times if the generating,
+            triangulation is fine, as only a small number of generating point
+            can be selected
+        innerMaskLevel : int
+            Mask level used to calculate the Voronoi mask, which in turn is
+            used to select which binCounts to return
+        outerMaskLevel : int
+            Mask level used for selecting generator vertices that will be 
+            used in the Voronoi diagram
+        """
+        # Calculate voronoi diagram
+        if mask:
+            self.sv = scipy.spatial.SphericalVoronoi(self.points[mask[outerMaskLevel]])
+        else:
+            self.sv = scipy.spatial.SphericalVoronoi(self.points)
+        # Sort the vertices of each region so that they are clockwise with respect to the generator
+        self.sv.sort_vertices_of_regions()
+        assert self.sv.points.shape[0] == mask.indices[outerMaskLevel].shape[0], \
+               "Voronoi should contain as many points as there are Trues in the mask."
     
-    @property
-    def nHex(self):
-        return np.unique(self.hexIds).shape[0]
+        # Convert the longitudes and latitudes of the generating vertices from cartesian coordinates to spherical
+        # coordinates in degrees
+        svTriCenterLats, svTriCenterLons = cartesian_to_spherical(self.sv.points[:, 0], self.sv.points[:, 1], self.sv.points[:, 2])[1:]
+        self.svTriCenterLats, self.svTriCenterLons = (np.degrees(svTriCenterLats.value), np.degrees(svTriCenterLons.value))
+        self.svTriCenterLons = np.where(self.svTriCenterLons>180, self.svTriCenterLons-360, self.svTriCenterLons)
+        
+        # Convert the longitudes and latitudes of the voronoi vertices from cartesian coordinates to spherical
+        # coordinates in degrees
+        svVertexLats, svVertexLons = cartesian_to_spherical(self.sv.vertices[:, 0], self.sv.vertices[:, 1], self.sv.vertices[:, 2])[1:]
+        self.svVertexLats, self.svVertexLons = (np.degrees(svVertexLats.value), np.degrees(svVertexLons.value))
+        self.svVertexLons = np.where(self.svVertexLons>180, self.svVertexLons-360, self.svVertexLons)
+        
+        # Create list of voronoi simplices, based only on the generating vertices
+        # (which may have been masked before using outerMaskLevel)
+        # Also create a list of their longitudes and latitudes
+        # by stacking the coordinates of the generator vertices on top of those
+        # of the Voronoi vertices
+        svSimplices = []
+        generatorIdx = []
+        nPoints = self.sv.points.shape[0]
+        for generatorVertex in range(nPoints):
+            region = np.array(self.sv.regions[generatorVertex]) + nPoints
+            nTriangles = len(region)
+            for t in range(nTriangles):
+                svSimplices.append([generatorVertex, region[t], region[(t+1)%nTriangles]])
+        self.svSimplices = np.array(np.array(svSimplices))
+        self.svTriLons = np.hstack((self.svTriCenterLons, self.svVertexLons))
+        self.svTriLats = np.hstack((self.svTriCenterLats, self.svVertexLats))
+        assert np.unique(self.svSimplices).max() + 1 == self.svTriLons.shape[0]  == self.svTriLats.shape[0], \
+               "Maximum element of svSimplices must correspond to the last index of svTriLons and svTriLats"
+        
+        # Create svMask, which is used to select which simplices of generating vertices can be used further
+        # (simplices with pseudo-'infinite' coordinates can be excluded this way)
+        self.svMask = mask.mask[innerMaskLevel][mask.indices[outerMaskLevel]][self.svSimplices[:, 0]]
+        assert self.svMask.shape[0] == self.svSimplices.shape[0], \
+               "Mask size should match svSimplices size"
+        
+    def create_KDTree(self):
+        """
+        Create a k-dimensional tree of the (masked) generating vertices (used for interpolation),
+        since interpolation in the voronoi simplices is by definition
+        equivalent to finding the nearest generating vertex.
+        """
+        if not hasattr(self, 'sv'):
+            raise RuntimeError("Cannot create KDTree before calculating the (masked) Spherical voronoi division.")
+        self.tree = scipy.spatial.cKDTree(self.sv.points)
     
+    def query_tree(self, points, **kwargs):
+        """
+        Check if a k-d tree already exist and query it.
+        
+        Parameters
+        ----------
+        points : np.array
+            (m x 3) dimensional array of m points to query the tree with
+        """
+        if not hasattr(self, "tree"):
+            self.create_KDTree()
+        return self.tree.query(points)
+        
     def particle_count(self, particles, tindex=0):
-        lons = np.radians(particles.lonlat[tindex,:,0])
-        lats = np.radians(particles.lonlat[tindex,:,1])
-        countTri = np.zeros(self.nTriangles)
-        countHex = np.zeros(self.nHex)
-        in_tri = self.icofaces.containing_triangle(lons, lats)
-        tri, counts = np.unique(in_tri, return_counts=True)
-        for tri, n in zip(vals, counts):
-            countTri[tri] = n
-            hexIdx = self.hexIds[tri]
-            countHex[hexIdx] += n            
+        """
+        Create 'histogram' of particles in hexBins.
+        
+        Parameters
+        ----------
+        particles : community.particles
+            Particles to create a histogram with.
+        tindex : int
+            Time index of particles.lonlat to determine the count for.
+        
+        Returns
+        -------
+        count : np.array
+            Array containing the counts per bin index.
+        """
+        if not hasattr(self, "tree"):
+            self.create_KDTree()
+        # Convert spherical coordinates of points to cartesian coordinates
+        xp, yp, zp = get_cartesian(particles.lonlat[tindex, :, 0], particles.lonlat[tindex, :, 1], mode='deg')
+        # Query the tree to get the closest point
+        closest = self.tree.query(np.dstack((xp, yp, zp))[0])[1]
+        # Count particles per bin
+        vals, counts = np.unique(closest, return_counts=True)
+        transdict = dict(zip(vals, counts))
+        # Arange counts in the correct order of bin indices
+        if hasattr(self, "svMask"):
+            count = np.array([transdict[i] if i in transdict.keys() else 0 for i in self.svSimplices[:,0][self.svMask]])
+        else:
+            count = np.array([transdict[i] if i in transdict.keys() else 0 for i in self.svSimplices[:,0]])
         if tindex == 0:
-            self.initCount = countTri
-            self.initCountHex = countHex
-        return countTri, countHex
+            self.initCount = count
+        return count
+    
+class hexMask:
+    """
+    Mask that can be used to determine which generating vertices in hexCountBins are kept,
+    given certain constraints in latitude and longitude. Mask can 'grow', by adding neighboring
+    vertices in successive levels
+    
+    Attributes
+    ----------
+    mask : dict
+        For a given level (integer key), contains an array with mask
+    indices : dict
+        For a given level (integer key), contains an array with indices of mask that are True
+    """
+    def __init__(self, hexBins, minLon, maxLon, minLat, maxLat, bleed = 0):
+        """
+        Parameters
+        ----------
+        hexBins : community.hexCountBins
+            Hexagonal counting bins to create the mask for
+        minLon : float
+            Minimum longitude of generating vertices
+        maxLon : float
+            Maximum longitude of generating vertices
+        minLat : float
+            Minimum latitude of generating vertices
+        maxLat : float
+            Maximum latitude of generating vertices
+        bleed : float
+            Increase the constraints in latitude and longitude by this margin
+        """
+        if hasattr(hexBins, "neighbors"):
+            self.hexBins = hexBins
+        else:
+            hexBins.calculate_neighbors()
+            self.hexBins = hexBins
+
+        self.mask = {}
+        self.indices = {}
+        self.mask[0] = np.logical_and(np.logical_and(self.hexBins.lons > minLon - bleed,
+                                                     self.hexBins.lons < maxLon + bleed),
+                                      np.logical_and(self.hexBins.lats > minLat - bleed, 
+                                                     self.hexBins.lats < maxLat + bleed))
+        # Determine indices of mask
+        self.indices[0] = np.array([self.hexBins.vertexIndices[i] for i in np.arange(len(self.mask[0])) if self.mask[0][i]])
+
+    def growLevel(self):
+        """
+        Grow the mask by one level: mark neighboring vertices as True
+        """
+        currMax = max(self.mask.keys())
+        self.mask[currMax + 1] = np.copy(self.mask[currMax])
+        for i in self.indices[currMax]:
+            for j in self.hexBins.neighbors[i]:
+                self.mask[currMax + 1][j] = True
+        self.indices[currMax + 1] = np.array([self.hexBins.vertexIndices[i] for i in np.arange(len(self.mask[currMax + 1])) if self.mask[currMax + 1][i]])
+
+    def growToLevel(self, toLevel):
+        """
+        Grow mask to the desired level
+        """
+        currMax = max(self.mask.keys())
+        if toLevel <= currMax:
+            print("Level already reached")
+        else:
+            while toLevel > currMax:
+                self.growLevel()
+                currMax = max(self.mask.keys())
+
+    def __getitem__(self,index):
+        """
+        When mask gets indexed, return the mask array for that level.
+        """
+        try:
+            return self.mask[index]
+        except:
+            raise IndexError("Mask growth level not available")
     
 class transMat:
     """
@@ -530,10 +810,6 @@ class transMat:
             Transition matrix object, including attributes `counter` containing particle
             tranistions, and  `sums` used for normalization.
 
-        Issues
-        ------
-        lonlats with NaN values will be put at index 60, 30 respectively. 
-        For these we don't want to look up the bindex
         """
         lonlatInit, lonlatFinal = lonlat_from_pset(pset, timedelta64)
         # Find initial and final counting bin index for each particle
@@ -544,11 +820,20 @@ class transMat:
                                      np.searchsorted(countBins.latBounds, lonlatInit[0,:,1])))[0]-1
             bindexFinal = np.dstack((np.searchsorted(countBins.lonBounds, lonlatFinal[0,:,0]), 
                                       np.searchsorted(countBins.latBounds, lonlatFinal[0,:,1])))[0]-1
-        elif countBins.binType == 'icosahedral':
-            raise NotImplementedError("Transition matrices from icosahedral grids still need to be implemented")
-        # `counter` counts particles from bindexInit to bindexFinal
+        
+        elif countBins.binType == 'hexagonal':
+            if not hasattr(self, "tree"):
+                self.create_KDTree()
+            # Convert spherical coordinates to cartesian
+            xInit, yInit, zInit = get_cartesian(lonlatInit[0,:,0], lonlatInit[0,:,1], mode='deg')
+            xFinal, yFinal, zFinal = get_cartesian(lonlatFinal[0,:,0], lonlatFinal[0,:,1], mode='deg')
+            # Find index of containing Voronoi region by querying tree
+            bindexInit = countBins.tree.query(np.dstack((xInit, yInit, zInit))[0])[1]
+            bindexFinal = countBins.tree.query(np.dstack((xFinal, yFinal, zFinal))[0])[1]
+            
+        # `counter` counts particles from bindexInit to bindexFinal. Square matrix should be of size countBins.n
         counter = np.zeros((countBins.n, countBins.n))
-        # shape of matrix is determined by in
+        # Number of particles to iterate over
         N = bindexInit.shape[0]
         # Constructing transition matrix from bin indices
         for i in range(N):
@@ -566,8 +851,9 @@ class transMat:
                     sourceIdx = countBins.bindex2D[bindexInit[i,1], bindexInit[i,0]]
                     destIdx = countBins.bindex2D[bindexFinal[i,1], bindexFinal[i,0]]
                     counter[sourceIdx, destIdx] += 1
-            elif countBins.binType == 'icosahedral':
-                raise NotImplementedError("Transition matrices from icosahedral grids still need to be implemented")
+            elif countBins.binType == 'hexagonal':
+                counter[bindexInit[i], bindexFinal[i]] += 1
+                
         if ignore_empty:
             nonEmpty = np.logical_or(np.sum(counter, axis=0) > 0, np.sum(counter, axis=1) > 0)
             countBins.nonEmptyBools = nonEmpty

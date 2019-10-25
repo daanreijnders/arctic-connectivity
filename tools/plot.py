@@ -28,15 +28,18 @@ def set_circular_boundary(ax):
 
 #########################################
 def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
-                    coast=True, land=False, polar=False, export=None, \
+                    coast=True, land=False, projection=False, polar=False, export=None, \
                     units=None, t_end=None, title="", colormap=None, size=None, cbar=True, **kwargs):
     # Extract Options
     minLat, maxLat = latRange
     minLon, maxLon = lonRange
-    if polar:
-        map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
+    if projection:
+        map_crs = projection
     else:
-        map_crs = ccrs.PlateCarree()
+        if polar:
+            map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
+        else:
+            map_crs = ccrs.PlateCarree()
     
     # Build axes
     if size:
@@ -54,7 +57,7 @@ def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180
         ax.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
     
     # Add gridlines
-    if polar:
+    if projection or polar:
         gl = ax.gridlines()
     else: 
         gl = ax.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
@@ -96,15 +99,18 @@ def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180
     return fig, ax
 
 def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
-                         coast=True, land=False, polar=False, export=None, \
+                         coast=True, land=False, projection=False, polar=False, export=None, \
                          title="", colormap=None, size=None, **kwargs):
     # Extract Options
     minLat, maxLat = latRange
     minLon, maxLon = lonRange
-    if polar:
-        map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
+    if projection:
+        map_crs = projection
     else:
-        map_crs = ccrs.PlateCarree()
+        if polar:
+            map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
+        else:
+            map_crs = ccrs.PlateCarree()
     
     # Build axes
     if size:
@@ -122,7 +128,7 @@ def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
         ax.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
     
     # Add gridlines
-    if polar:
+    if polar or projection:
         gl = ax.gridlines()
     else: 
         gl = ax.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
@@ -153,7 +159,7 @@ def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
             plt.savefig(f'figures/{export}.png', dpi=300, bbox_inches='tight')
     return fig, ax
 
-def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, t_index=0, land=True, polar=False, vectorField=False, export=None, t_end=None, titleAttribute="", colormap=None):
+def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, t_index=0, land=True, projection=False, polar=False, vectorField=False, export=None, t_end=None, titleAttribute="", colormap=None):
     """This function creates a cartopy plot of the input field.
     
     :param inputfield: field to plot
@@ -180,10 +186,14 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
     lons    = inputfield.grid.lon
     lats    = inputfield.grid.lat
     fig     = plt.figure()
-    if polar:
-        map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
+    if projection:
+        map_crs = projection
     else:
-        map_crs = ccrs.PlateCarree()
+        if polar:
+            map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
+        else:
+            map_crs = ccrs.PlateCarree()
+            
     ax = plt.axes(projection=map_crs)
     
     # Determine boundaries and add land mask
@@ -194,7 +204,7 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
         ax.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
     
     # Add gridlines
-    if polar:
+    if polar or projection:
         gl = ax.gridlines()
     else: 
         gl = ax.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
@@ -306,7 +316,7 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
 
 
 class particleAnimation:
-    def create(pfile, field=None, extent=None, cbar=True, polar=False, times='flat', particle_subsample=1, margin=3, nbar=False, EEZ_mapping=None, barLength=100, titleAttribute='', mask=True, fps=24):
+    def create(pfile, field=None, extent=None, cbar=True, projection=False, polar=False, times='flat', particle_subsample=1, margin=3, nbar=False, EEZ_mapping=None, barLength=100, titleAttribute='', mask=True, fps=24):
         """Create particle animations
         
         :param pfile: particleset.nc file
@@ -329,10 +339,13 @@ class particleAnimation:
         mesh = pfile.attrs['parcels_mesh'] if 'parcels_mesh' in pfile.attrs else 'spherical'
         
         # Set projection
-        if polar:
-            map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
+        if projection:
+            map_crs = projection
         else:
-            map_crs = ccrs.PlateCarree()
+            if polar:
+                map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
+            else:
+                map_crs = ccrs.PlateCarree()
         
         # Create figure
         fig     = plt.figure(figsize=(9,5))
@@ -371,7 +384,7 @@ class particleAnimation:
             fieldName = 'noField'
             
         # Draw gridlines
-        if polar:
+        if polar or projection:
             gl = ax.gridlines()
         else:
             gl = ax.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
