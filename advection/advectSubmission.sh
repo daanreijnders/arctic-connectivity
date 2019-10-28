@@ -23,4 +23,4 @@ cd /home/students/4302001/arctic-connectivity/advection
 # COMMANDS HERE
 #python3 ../tools/advectParticles.py rcp85 360 60 20000109 -d 30 -dt 20
 #python3 ico_advection.py
-python3 wedge_advection.py
+python3 wedge_advection.py 20010101
