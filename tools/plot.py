@@ -22,22 +22,39 @@ def set_circular_boundary(ax):
     theta = np.linspace(0, 2*np.pi, 400)
     center, radius = [0.5, 0.5], 0.5
     verts = np.vstack([np.sin(theta), np.cos(theta)]).T
-    circle = mpath.Path(verts * radius + center)
-    ax.set_boundary(circle, transform=ax.transAxes)
-    return circle
+    circlePath = mpath.Path(verts * radius + center)
+    ax.set_boundary(circlePath, transform=ax.transAxes)
+    return circlePath
 
-#########################################
+def set_wedge_boundary(ax, minLon, maxLon, minLat, maxLat):
+    wedgeLons = np.concatenate((np.linspace(minLon, maxLon, 50),
+                                np.linspace(maxLon, maxLon, 50),
+                                np.linspace(maxLon, minLon, 50),
+                                np.linspace(minLon, minLon, 50)))
+    wedgeLats = np.concatenate((np.linspace(minLat, minLat, 50),
+                                np.linspace(minLat, maxLat, 50),
+                                np.linspace(maxLat, maxLat, 50),
+                                np.linspace(maxLat, minLat, 50)))
+    wedgePath = mpath.Path(np.dstack((wedgeLons, wedgeLats))[0])
+    ax.set_boundary(wedgePath, transform=ccrs.PlateCarree())
+    return wedgePath
+
+########################################################################################
 def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
-                    coast=True, land=False, projection=False, polar=False, export=None, \
+                    coast=True, land=False, projection=False, polar=False, wedge=False, export=None, \
                     units=None, t_end=None, title="", colormap=None, size=None, cbar=True, **kwargs):
     # Extract Options
     minLat, maxLat = latRange
     minLon, maxLon = lonRange
+    
     if projection:
         map_crs = projection
     else:
         if polar:
             map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
+        elif wedge: 
+            map_crs = ccrs.Stereographic(central_latitude = minLat+(maxLat-minLat)/2, central_longitude=minLon+(maxLon-minLon)/2)
+
         else:
             map_crs = ccrs.PlateCarree()
     
@@ -47,7 +64,7 @@ def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180
     else:
         fig     = plt.figure()
     ax      = plt.axes(projection=map_crs)
-    
+
     ax.set_extent((minLon,maxLon,minLat,maxLat), crs=ccrs.PlateCarree())
     
     # Set masks
@@ -57,17 +74,20 @@ def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180
         ax.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
     
     # Add gridlines
-    if projection or polar:
-        gl = ax.gridlines()
+    if projection or polar or wedge:
+        gl = ax.gridlines(linestyle='--', alpha=0.5, linewidth=0.5)
     else: 
-        gl = ax.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
+        gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.5, linewidth=0.5, draw_labels = True)
         gl.xlabels_top   = False
         gl.ylabels_right = False
         gl.xformatter    = LONGITUDE_FORMATTER
         gl.yformatter    = LATITUDE_FORMATTER
+        
     # Circular clipping
     if polar:
         circle_clip = set_circular_boundary(ax)
+    if wedge:
+        wedge_clip = set_wedge_boundary(ax, minLon, maxLon, minLat, maxLat)
     
     if not colormap:
         colormap = 'viridis'
@@ -80,12 +100,21 @@ def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180
     # Colorbar
     if cbar:
         divider = make_axes_locatable(ax)
-        ax_cb   = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
-        fig.add_axes(ax_cb)
-        cbar    = plt.colorbar(plotfield, cax=ax_cb)
+        if wedge:
+            ax_cb = divider.new_vertical(size="5%", pad=0.1, axes_class=plt.Axes, pack_start=True)
+            fig.add_axes(ax_cb)
+            cbar = plt.colorbar(plotfield, cax=ax_cb, orientation='horizontal')
+        else:
+            ax_cb = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
+            fig.add_axes(ax_cb)
+            cbar = plt.colorbar(plotfield, cax=ax_cb)
+        
         # Set units
         if units:
-            cbar.ax.set_ylabel(f"({str(units)})")
+            if wedge:
+                cbar.ax.set_xlabel(f"({str(units)})")
+            else:
+                cbar.ax.set_ylabel(f"({str(units)})")
     
     ax.set_title(title)
     # Export as figure
@@ -98,17 +127,23 @@ def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180
             plt.savefig(f'figures/{export}.png', dpi=300, bbox_inches='tight')
     return fig, ax
 
-def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
-                         coast=True, land=False, projection=False, polar=False, export=None, \
-                         title="", colormap=None, size=None, **kwargs):
+########################################################################################
+
+def triangular_field_from_dataset(lons, lats, triangles, data, latRange=(-90, 90), lonRange=(-180, 180), \
+                    coast=True, land=False, projection=False, polar=False, wedge=False, export=None, \
+                    units=None, t_end=None, title="", colormap=None, size=None, cbar=True, **kwargs):
     # Extract Options
     minLat, maxLat = latRange
     minLon, maxLon = lonRange
+    
     if projection:
         map_crs = projection
     else:
         if polar:
             map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
+        elif wedge: 
+            map_crs = ccrs.Stereographic(central_latitude = minLat+(maxLat-minLat)/2, central_longitude=minLon+(maxLon-minLon)/2)
+
         else:
             map_crs = ccrs.PlateCarree()
     
@@ -118,7 +153,7 @@ def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
     else:
         fig     = plt.figure()
     ax      = plt.axes(projection=map_crs)
-    
+
     ax.set_extent((minLon,maxLon,minLat,maxLat), crs=ccrs.PlateCarree())
     
     # Set masks
@@ -128,10 +163,10 @@ def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
         ax.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
     
     # Add gridlines
-    if polar or projection:
-        gl = ax.gridlines()
+    if projection or polar or wedge:
+        gl = ax.gridlines(linestyle='--', alpha=0.5, linewidth=0.5)
     else: 
-        gl = ax.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
+        gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.5, linewidth=0.5, draw_labels = True)
         gl.xlabels_top   = False
         gl.ylabels_right = False
         gl.xformatter    = LONGITUDE_FORMATTER
@@ -139,10 +174,99 @@ def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
     # Circular clipping
     if polar:
         circle_clip = set_circular_boundary(ax)
+    if wedge:
+        wedge_clip = set_wedge_boundary(ax, minLon, maxLon, minLat, maxLat)
     
     if not colormap:
         colormap = 'viridis'
+        
     # Plot field
+    if polar: 
+        plotfield = ax.tripcolor(lons, lats, triangles=triangles, facecolors=data, transform=ccrs.Geodetic(), clip_path=(circle_clip, ax.transAxes), cmap=colormap, **kwargs)
+    else:
+        plotfield = ax.tripcolor(lons, lats, triangles=triangles, facecolors=data, transform=ccrs.Geodetic(), cmap=colormap, **kwargs)
+    
+    # Colorbar
+    if cbar:
+        divider = make_axes_locatable(ax)
+        if wedge:
+            ax_cb = divider.new_vertical(size="5%", pad=0.1, axes_class=plt.Axes, pack_start=True)
+            fig.add_axes(ax_cb)
+            cbar = plt.colorbar(plotfield, cax=ax_cb, orientation='horizontal')
+        else:
+            ax_cb = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
+            fig.add_axes(ax_cb)
+            cbar = plt.colorbar(plotfield, cax=ax_cb)
+        
+        # Set units
+        if units:
+            if wedge:
+                cbar.ax.set_xlabel(f"({str(units)})")
+            else:
+                cbar.ax.set_ylabel(f"({str(units)})")
+    
+    ax.set_title(title)
+    # Export as figure
+    if export:
+        if not os.path.exists('figures'):
+            os.makedirs('figures')
+        if export[-4] == '.':
+            plt.savefig(f'figures/{export}', dpi=300, bbox_inches='tight')
+        else:
+            plt.savefig(f'figures/{export}.png', dpi=300, bbox_inches='tight')
+    return fig, ax
+
+########################################################################################
+
+def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
+                         coast=True, land=False, projection=False, polar=False, wedge=True, export=None, \
+                         title="", colormap=None, size=None, **kwargs):
+    # Extract Options
+    minLat, maxLat = latRange
+    minLon, maxLon = lonRange
+    
+    if projection:
+        map_crs = projection
+    else:
+        if polar:
+            map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
+        elif wedge: 
+            map_crs = ccrs.Stereographic(central_latitude = minLat+(maxLat-minLat)/2, central_longitude=minLon+(maxLon-minLon)/2)
+
+        else:
+            map_crs = ccrs.PlateCarree()
+    
+    # Build axes
+    if size:
+        fig     = plt.figure(figsize=size)
+    else:
+        fig     = plt.figure()
+    ax      = plt.axes(projection=map_crs)
+
+    ax.set_extent((minLon,maxLon,minLat,maxLat), crs=ccrs.PlateCarree())
+    
+    # Set masks
+    if coast:
+        ax.coastlines()
+    if land:
+        ax.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
+    
+    # Add gridlines
+    if projection or polar or wedge:
+        gl = ax.gridlines(linestyle='--', alpha=0.5, linewidth=0.5)
+    else: 
+        gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.5, linewidth=0.5, draw_labels = True)
+        gl.xlabels_top   = False
+        gl.ylabels_right = False
+        gl.xformatter    = LONGITUDE_FORMATTER
+        gl.yformatter    = LATITUDE_FORMATTER
+    # Circular clipping
+    if polar:
+        circle_clip = set_circular_boundary(ax)
+    if wedge:
+        wedge_clip = set_wedge_boundary(ax, minLon, maxLon, minLat, maxLat)
+        
+        
     if polar: 
         plotfield = ax.scatter(lons, lats, transform=ccrs.PlateCarree(), clip_path=(circle_clip, ax.transAxes), cmap=colormap, **kwargs)
     else:
@@ -159,7 +283,9 @@ def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
             plt.savefig(f'figures/{export}.png', dpi=300, bbox_inches='tight')
     return fig, ax
 
-def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, t_index=0, land=True, projection=False, polar=False, vectorField=False, export=None, t_end=None, titleAttribute="", colormap=None):
+########################################################################################
+
+def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, wedge=False, t_index=0, land=True, projection=False, polar=False, vectorField=False, export=None, t_end=None, titleAttribute="", colormap=None):
     """This function creates a cartopy plot of the input field.
     
     :param inputfield: field to plot
@@ -197,7 +323,10 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
     ax = plt.axes(projection=map_crs)
     
     # Determine boundaries and add land mask
-    ax.set_extent((minLon,maxLon,minLat,maxLat), crs=ccrs.PlateCarree())
+    if wedge:
+        ax.set_extent((-50,70,57.5,90), crs=ccrs.PlateCarree())
+    else:
+        ax.set_extent((minLon,maxLon,minLat,maxLat), crs=ccrs.PlateCarree())
     if coast:
         ax.coastlines()
     if land:
@@ -205,9 +334,9 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
     
     # Add gridlines
     if polar or projection:
-        gl = ax.gridlines()
+        gl = ax.gridlines(linestyle='--', alpha=0.5, linewidth=0.5)
     else: 
-        gl = ax.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
+        gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.5, linewidth=0.5, draw_labels = True)
         gl.xlabels_top   = False
         gl.ylabels_right = False
         gl.xformatter    = LONGITUDE_FORMATTER
@@ -316,27 +445,28 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
 
 
 class particleAnimation:
-    def create(pfile, field=None, extent=None, cbar=True, projection=False, polar=False, times='flat', particle_subsample=1, margin=3, nbar=False, EEZ_mapping=None, barLength=100, titleAttribute='', mask=True, fps=24):
-        """Create particle animations
-        
-        :param pfile: particleset.nc file
-        :param field: field to plot animation on
-        :param margin: number of degrees of margin around maximum extent that particles have travelled
-        :param polar: boolean to specify plot should be NorthPolarStereo
-        :param nbar: specify number of bars in barchart. If False, no barchart is produced
-        :param EEZ_mapping: dataframe linking EEZ IDs to name
-        :param barLength: integer specifying maximum y-extent of barchart
-        :param fps: frames per second of animation
-        :param titleAttribute: string to extend the title of the plot with
-        :param extent: Tuple with (minlon, maxlon, minlat, maxlat) of plot
+    def create(pfile, field=None, lonRange=None, latRange=None, coast=True, land=False, projection=False, polar=False, wedge=False, times='flat', particle_subsample=1, title="", fps=24, colormap=None, size=None, cbar=True, **kwargs):
         """
+        Create particle animations
+        """
+        
         # Load arrays from file
         lon = np.ma.filled(pfile.variables['lon'][::particle_subsample], np.nan)
         lat = np.ma.filled(pfile.variables['lat'][::particle_subsample], np.nan)
         time = np.ma.filled(pfile.variables['time'][::particle_subsample], np.nan)
-        if EEZ_mapping:
-            EEZ_evol = np.ma.filled(pfile.variables['z'][::particle_subsample], np.nan)
         mesh = pfile.attrs['parcels_mesh'] if 'parcels_mesh' in pfile.attrs else 'spherical'
+        
+        # Range
+        if lonRange:
+            minLon, maxLon = lonRange
+        else: 
+            minlon = np.amin(pfile.variables['lon']) - margin
+            maxlon = np.amax(pfile.variables['lon']) + margin
+        if latRange:
+            minLat, maxLat = latRange
+        else:
+            minlat = np.amin(pfile.variables['lat']) - margin
+            maxlat = np.amax(pfile.variables['lat']) + margin
         
         # Set projection
         if projection:
@@ -344,54 +474,48 @@ class particleAnimation:
         else:
             if polar:
                 map_crs = ccrs.NorthPolarStereo(central_longitude=0.0, globe=None)
+            elif wedge: 
+                map_crs = ccrs.Stereographic(central_latitude = minLat+(maxLat-minLat)/2, central_longitude=minLon+(maxLon-minLon)/2)
             else:
                 map_crs = ccrs.PlateCarree()
         
-        # Create figure
-        fig     = plt.figure(figsize=(9,5))
-        ax      = plt.subplot(projection=map_crs)  
+        if size:
+            fig     = plt.figure(figsize=size)
+        else:
+            fig     = plt.figure()
+        ax      = plt.axes(projection=map_crs)
+        ax.set_extent((minLon,maxLon,minLat,maxLat), crs=ccrs.PlateCarree())
         
-        # Find extent for plot
-        if not extent:
-            minlon = np.amin(pfile.variables['lon'])
-            minlat = np.amin(pfile.variables['lat'])
-            maxlon = np.amax(pfile.variables['lon'])
-            maxlat = np.amax(pfile.variables['lat'])
-            if polar:
-                extent = (0, 360, minlat-margin, 90)
-            else:
-                extent = (max(minlon-margin, -180), min(maxlon+margin, 180), max(minlat-margin, -90), min(maxlat+margin, 90))
-        ax.set_extent(extent, crs=ccrs.PlateCarree())
-        
-        # Add coastlines and land mask
-        ax.coastlines()
-        if mask:
+        # Set masks
+        if coast:
+            ax.coastlines()
+        if land:
             ax.add_feature(cart.feature.LAND, zorder=5, edgecolor='k')
+        
+            # Add gridlines
+        if projection or polar or wedge:
+            gl = ax.gridlines(linestyle='--', alpha=0.5, linewidth=0.5)
+        else: 
+            gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.5, linewidth=0.5, draw_labels = True)
+            gl.xlabels_top   = False
+            gl.ylabels_right = False
+            gl.xformatter    = LONGITUDE_FORMATTER
+            gl.yformatter    = LATITUDE_FORMATTER
+
+        # Circular clipping
         if polar:
             circle_clip = set_circular_boundary(ax)
+        if wedge:
+            wedge_clip = set_wedge_boundary(ax, minLon, maxLon, minLat, maxLat)
             
         if field:
             fieldName = field.name
-            if fieldName == 'EEZ':
-                colormap = 'Set3'
-            elif fieldName == 'U' or 'V':
-                colormap = 'viridis'
-            else:
-                colormap = 'viridis'
             field.fieldset.computeTimeChunk(field.grid.time[0], 1)
+            if not colormap:
+                colormap = 'viridis'
             ax.pcolormesh(field.lon, field.lat, field.data[0,:,:], transform=map_crs, cmap=colormap, zorder=1)
         else:
             fieldName = 'noField'
-            
-        # Draw gridlines
-        if polar or projection:
-            gl = ax.gridlines()
-        else:
-            gl = ax.gridlines(crs=map_crs, linestyle='--', draw_labels = True)
-            gl.xlabels_top = False
-            gl.ylabels_right = False
-            gl.xformatter = LONGITUDE_FORMATTER
-            gl.yformatter = LATITUDE_FORMATTER
 
         # Determine plotting time indices
         if times == 'flat':
@@ -411,67 +535,42 @@ class particleAnimation:
         # Create initial scatter plot of particles
         scat   = ax.scatter(lon[currtime], lat[currtime], c=lat[currtime], s=0.2, transform=ccrs.Geodetic(), zorder=10)
         
+        # Colorbar
         if cbar:
             divider = make_axes_locatable(ax)
-            ax_cb   = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
-            fig.add_axes(ax_cb)
-            cbar    = plt.colorbar(scat, cax=ax_cb)
-            cbar.ax.set_ylabel(f"Initial latitude")
+            if wedge:
+                ax_cb = divider.new_vertical(size="5%", pad=0.1, axes_class=plt.Axes, pack_start=True)
+                fig.add_axes(ax_cb)
+                cbar = plt.colorbar(plotfield, cax=ax_cb, orientation='horizontal')
+            else:
+                ax_cb = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
+                fig.add_axes(ax_cb)
+                cbar = plt.colorbar(plotfield, cax=ax_cb)
+
+            # Set units
+            if units:
+                if wedge:
+                    cbar.ax.set_xlabel(f"({str(units)})")
+                else:
+                    cbar.ax.set_ylabel(f"({str(units)})")
         
-        # Add bar chart
-        if nbar and fieldName=='EEZ':
-            # Determine EEZs that are most visited in pfile
-            uniques, counts = np.unique(np.where(np.isnan(pfile['EEZ'].data), -1, pfile['EEZ'].data), return_counts=True) # NaNs become -1
-            EEZoccurenceDict = dict(zip(uniques, counts))
-            EEZoccurenceDict.pop(-1)
-            plotEEZbars = []
-            while len(EEZoccurenceDict) >= nbar and len(plotEEZbars) < nbar:
-                plotEEZbars.append(max(EEZoccurenceDict, key=EEZoccurenceDict.get))
-                popVal = EEZoccurenceDict.pop(max(EEZoccurenceDict, key=EEZoccurenceDict.get))
-            # Count instances of particles at EEZ in target list at a certain timestep
-            def EEZ_counter(timestep):
-                currEEZ = np.where(np.isnan(pfile['EEZ'].data[timestep]), -1, pfile['EEZ'].data[timestep])
-                currCount = np.zeros(len(plotEEZbars))
-                for el in currEEZ:
-                    try:
-                        idx = plotEEZbars.index(el)
-                        currCount[idx] += 1
-                    except ValueError:
-                        pass
-                return currCount
-            # Draw bar chart
-            divider = make_axes_locatable(ax)
-            barplot = divider.append_axes("right", size=2, pad=1, axes_class=plt.Axes)
-            bar    = barplot.barh(np.arange(nbar), EEZ_counter(currtime))
-            barplot.set_xlim(0, barLength)
-            barplot.set_yticks(np.arange(nbar))
-            if EEZ_mapping is not None:
-                # Map EEZ IDs to ISO country codes (ROOM FOR IMPROVEMENT ON HANDLING THIS MAPPING PROCESS)
-                EEZ_df = pd.read_json(EEZ_mapping)
-                barplot.set_yticklabels([EEZ_df[EEZ_df['ID'] == ID]['ISO'].values[0] for ID in plotEEZbars])
-            else: 
-                barplot.set_yticklabels([str(label) for label in plotEEZbars])
-            barplot.set_ylabel('EEZ ID')
-            barplot.set_xlabel('Count')
-            barplot.invert_yaxis()
-        
-        title = fig.suptitle('Particles at time ' + str(plottimes[0])[:13])
+        head = fig.suptitle('Particles at time ' + str(plottimes[0])[:13])
         frames = np.arange(0, len(plottimes))
         
         # Animation
         def animate(t):
             currtime = time == plottimes[t]
             scat.set_offsets(np.vstack((lon[currtime], lat[currtime])).transpose())
-            title.set_text('Particles at time ' + str(plottimes[t])[:13])
-            if nbar:
-                for rect, width in zip(bar, EEZ_counter(currtime)):
-                    rect.set_width(width)
+            head.set_text('Particles at time ' + str(plottimes[t])[:13])
             return scat,
-        anim = animation.FuncAnimation(fig, animate, frames=len(plottimes), blit=True)
+        
+        anim = animation.FuncAnimation(fig, 
+                                       animate, 
+                                       frames=len(plottimes),
+                                       blit=True)
         if not os.path.exists('animations'):
             os.makedirs('animations')
-        anim.save(f'animations/particle_evolution_{fieldName}_{titleAttribute}.mp4', fps=fps, metadata={'artist':'Daan', 'title':f'Particles on {fieldName} - {titleAttribute}'}, extra_args=['-vcodec', 'libx264'])
-
+        anim.save(f'animations/particle_evolution_{fieldName}_{title}.mp4', fps=fps, metadata={'artist':'Daan', 'title':f'Particles on {fieldName} - {title}'}, extra_args=['-vcodec', 'libx264'])
         plt.show()
         plt.close()
 
