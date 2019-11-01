@@ -445,7 +445,7 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
 
 
 class particleAnimation:
-    def create(pfile, field=None, lonRange=None, latRange=None, coast=True, land=False, projection=False, polar=False, wedge=False, times='flat', particle_subsample=1, title="", fps=24, colormap=None, size=None, cbar=True, **kwargs):
+    def create(pfile, field=None, lonRange=None, latRange=None, coast=True, land=False, projection=False, polar=False, wedge=False, times='flat', particle_subsample=1, title="", fps=24, colormap=None, size=None, cbar=True, units=None, **kwargs):
         """
         Create particle animations
         """
@@ -541,11 +541,11 @@ class particleAnimation:
             if wedge:
                 ax_cb = divider.new_vertical(size="5%", pad=0.1, axes_class=plt.Axes, pack_start=True)
                 fig.add_axes(ax_cb)
-                cbar = plt.colorbar(plotfield, cax=ax_cb, orientation='horizontal')
+                cbar = plt.colorbar(scat, cax=ax_cb, orientation='horizontal')
             else:
                 ax_cb = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
                 fig.add_axes(ax_cb)
-                cbar = plt.colorbar(plotfield, cax=ax_cb)
+                cbar = plt.colorbar(scat, cax=ax_cb)
 
             # Set units
             if units:

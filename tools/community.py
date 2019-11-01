@@ -4,6 +4,8 @@ import numpy as np
 import xarray as xr
 import networkx as nx
 from scipy.interpolate import griddata
+from scipy.spatial import cKDTree, SphericalVoronoi
+from astropy.coordinates import cartesian_to_spherical, spherical_to_cartesian
 import matplotlib.pyplot as plt
 import cartopy as cart
 from datetime import datetime
@@ -97,8 +99,7 @@ class particles:
     lons : np.array
         list of longitudes (in degrees)
     lonlat : np.ndarray
-        3D array holding pairs of latitude and longitude of each particle. 
-        First index corresponds to time, second to longitude, third to latitude.
+        2D array holding pairs of latitude and longitude of each particle
     n : int
         number of gridpoints
     idx : np.ndarray
@@ -238,14 +239,12 @@ class particles:
 class countBins:
     """
     Bins used for counting particles.
-    
-    Parameters
+
+    Attributes
     ----------
     binType : str
         Indicates the type of bin: `regular` or `hexagonal`
     """
-    def __init__(self, bindex):
-        self.bindex = bindex
         
     @property
     def n(self):
@@ -291,9 +290,14 @@ class countBins:
         #2D
         communityID = np.zeros(self.n)
         communityID.fill(np.nan)
+        communityFlow = np.zeros(self.n)
+        communityFlow.fill(np.nan)
         for n in range(self.n):
+            # +1 because counting in DF starts at zero
             communityID[n] = int(self.communityDF['module'].loc[self.bindex[n]+1])
+            communityFlow[n] = self.communityDF['flow'].loc[self.bindex[n]+1] 
         self.communityID = communityID
+        self.communityFlow = communityFlow
         
     def color_communities(self, num_colors=4):
         """Associate new colors to existing communities by using graph coloring.
@@ -320,11 +324,8 @@ class countBins:
             raise RuntimeError('The counting grid does not yet have an adjacency dictionary for determining the coloring of communities. Try calling the `find_adjacency()` method first.')
         maxDegree = max([d for n, d in self.communityNetwork.degree()])
         if not nx.algorithms.planarity.check_planarity(self.communityNetwork)[0]:
-            print('Graph is not planar!')
             if maxDegree >= num_colors:
                 num_colors = maxDegree+1
-                print(f'Using {maxDegree+1} colors instead.')
-        #self.colorMapping = nx.coloring.equitable_color(self.communityNetwork, num_colors=num_colors)
         self.colorMapping = nx.coloring.greedy_color(self.communityNetwork, strategy='largest_first')
         self.colorID = np.array([self.colorMapping[index] for index in self.communityID.flatten()]).reshape(self.communityID.shape)
         return self.colorID
@@ -354,11 +355,8 @@ class countBins:
             raise RuntimeError('The counting grid does not yet have an adjacency dictionary for determining the coloring of communities. Try calling the `find_adjacency()` method first.')
         maxDegree = max([d for n, d in self.communityNetwork.degree()])
         if not nx.algorithms.planarity.check_planarity(self.communityNetwork)[0]:
-            print('Graph is not planar!')
             if maxDegree >= num_colors:
                 num_colors = maxDegree+1
-                print(f'Using {maxDegree+1} colors instead.')
-        #self.colorMapping = nx.coloring.equitable_color(self.communityNetwork, num_colors=num_colors)
         self.colorMapping = nx.coloring.greedy_color(self.communityNetwork, strategy='largest_first')
         self.colorID = np.array([self.colorMapping[index] for index in self.communityID.flatten()]).reshape(self.communityID.shape)
         return self.colorID
@@ -395,7 +393,7 @@ class regularCountBins(countBins):
         self.lonCenters2D, self.latCenters2D = np.meshgrid(lonCenters, latCenters)
         self.lonIdx2D, self.latIdx2D = np.meshgrid(np.arange(nlon), np.arange(nlat))
         self.gridShape = self.lonIdx2D.shape
-        super().__init__(np.arange(len(self.lonIdx2D.flatten())))
+        self.bindex = (np.arange(len(self.lonIdx2D.flatten())))
         self.bindex2D = self.bindex.reshape(self.gridShape)
         
     def particle_count(self, particles, tindex=0):
@@ -500,7 +498,7 @@ class hexCountBins(countBins):
         self.lats = lats
         self.vertexIndices = vertexIndices
         self.simplices = simplices
-        
+    
     @property
     def n(self):
         """
@@ -508,10 +506,8 @@ class hexCountBins(countBins):
         -------
         Number of points in the triangulation
         """
-        if hasattr(self, "sv"):
-            return self.sv.points.shape[0]
-        else:
-            return self.points.shape[0]
+        return self.sv.points.shape[0]
+
     
     @classmethod
     def from_stripy(cls, refinement):
@@ -578,11 +574,14 @@ class hexCountBins(countBins):
             Mask level used for selecting generator vertices that will be 
             used in the Voronoi diagram
         """
+        self.innerMaskLevel = innerMaskLevel
+        self.outerMaskLevel = outerMaskLevel
+        self.mask = mask
         # Calculate voronoi diagram
         if mask:
-            self.sv = scipy.spatial.SphericalVoronoi(self.points[mask[outerMaskLevel]])
+            self.sv = SphericalVoronoi(self.points[mask[outerMaskLevel]])
         else:
-            self.sv = scipy.spatial.SphericalVoronoi(self.points)
+            self.sv = SphericalVoronoi(self.points)
         # Sort the vertices of each region so that they are clockwise with respect to the generator
         self.sv.sort_vertices_of_regions()
         assert self.sv.points.shape[0] == mask.indices[outerMaskLevel].shape[0], \
@@ -606,14 +605,13 @@ class hexCountBins(countBins):
         # by stacking the coordinates of the generator vertices on top of those
         # of the Voronoi vertices
         svSimplices = []
-        generatorIdx = []
-        nPoints = self.sv.points.shape[0]
-        for generatorVertex in range(nPoints):
-            region = np.array(self.sv.regions[generatorVertex]) + nPoints
+        self.bindex = np.arange(self.n)
+        for generatorVertex in self.bindex:
+            region = np.array(self.sv.regions[generatorVertex]) + self.n
             nTriangles = len(region)
             for t in range(nTriangles):
                 svSimplices.append([generatorVertex, region[t], region[(t+1)%nTriangles]])
-        self.svSimplices = np.array(np.array(svSimplices))
+        self.svSimplices = np.array(svSimplices)
         self.svTriLons = np.hstack((self.svTriCenterLons, self.svVertexLons))
         self.svTriLats = np.hstack((self.svTriCenterLats, self.svVertexLats))
         assert np.unique(self.svSimplices).max() + 1 == self.svTriLons.shape[0]  == self.svTriLats.shape[0], \
@@ -624,7 +622,24 @@ class hexCountBins(countBins):
         self.svMask = mask.mask[innerMaskLevel][mask.indices[outerMaskLevel]][self.svSimplices[:, 0]]
         assert self.svMask.shape[0] == self.svSimplices.shape[0], \
                "Mask size should match svSimplices size"
-        
+    
+    def calculate_subsetted_neighbors(self):
+        """
+        Create a dictionary with indices of neighbors for each vertex (key)
+        in the subsetted triangulation.
+        """
+        originalIndices = self.mask.indices[self.outerMaskLevel]
+        transDict = dict(zip(originalIndices, self.bindex))
+        self.subsettedNeighbors = {}
+        for generatorVertex in self.bindex:
+            self.subsettedNeighbors[generatorVertex] = set()
+            neighbors = self.neighbors[originalIndices[generatorVertex]]
+            for n in neighbors:
+                try:
+                    self.subsettedNeighbors[generatorVertex].add(transDict[n])
+                except KeyError:
+                    pass
+    
     def create_KDTree(self):
         """
         Create a k-dimensional tree of the (masked) generating vertices (used for interpolation),
@@ -633,7 +648,7 @@ class hexCountBins(countBins):
         """
         if not hasattr(self, 'sv'):
             raise RuntimeError("Cannot create KDTree before calculating the (masked) Spherical voronoi division.")
-        self.tree = scipy.spatial.cKDTree(self.sv.points)
+        self.tree = cKDTree(self.sv.points)
     
     def query_tree(self, points, **kwargs):
         """
@@ -681,6 +696,39 @@ class hexCountBins(countBins):
         if tindex == 0:
             self.initCount = count
         return count
+    
+    def find_adjacency(self):
+        """
+        Create an adjacency list: for each node (grid cell), determine which nodes are bordering this node.
+
+        Returns
+        -------
+        dict
+            Containing keys corresponding to community IDs and values being `set` objects
+            containing IDs of bordering communities.
+        """
+        if not hasattr(self, "subsettedNeighbors"):
+            self.calculate_subsetted_neighbors()
+        
+        self.adjacencyDict = {}
+        for generatorVertex in self.bindex:   
+            self.mask.indices[self.outerMaskLevel][generatorVertex]
+            
+        # Construct empty adjacency dictionary
+        # Using dictionary so that labels coincide labels created by InfoMap, rather than being 
+        # indices, which might not coincide with labels.
+        self.adjacencyDict = {}
+        # Iterate over all cells
+        for vertex in self.bindex:
+            # Save current community in variable
+            currentCommunity = int(self.communityID[vertex])
+            # If the current community doesn't have a key and value yet, add an empty
+            # set to the dictionary, with the key being the community ID.
+            if currentCommunity not in self.adjacencyDict:
+                self.adjacencyDict[currentCommunity] = set()
+            for neighbor in self.subsettedNeighbors[vertex]:
+                self.adjacencyDict[currentCommunity].add(int(self.communityID[neighbor]))
+        return self.adjacencyDict
     
 class hexMask:
     """
@@ -820,10 +868,9 @@ class transMat:
                                      np.searchsorted(countBins.latBounds, lonlatInit[0,:,1])))[0]-1
             bindexFinal = np.dstack((np.searchsorted(countBins.lonBounds, lonlatFinal[0,:,0]), 
                                       np.searchsorted(countBins.latBounds, lonlatFinal[0,:,1])))[0]-1
-        
         elif countBins.binType == 'hexagonal':
-            if not hasattr(self, "tree"):
-                self.create_KDTree()
+            if not hasattr(countBins, "tree"):
+                countBins.create_KDTree()
             # Convert spherical coordinates to cartesian
             xInit, yInit, zInit = get_cartesian(lonlatInit[0,:,0], lonlatInit[0,:,1], mode='deg')
             xFinal, yFinal, zFinal = get_cartesian(lonlatFinal[0,:,0], lonlatFinal[0,:,1], mode='deg')
