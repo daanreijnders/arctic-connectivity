@@ -1,7 +1,7 @@
 #/bin/sh
 
 # SGE: the job name
-#$ -N check_particle_evolution
+#$ -N particle_animation
 #$ -V
 #$ -l hostname=science-bs35 #make sure it is in the right node
 #
@@ -14,10 +14,10 @@
 #$ -m s
 #
 # SGE: ouput in the current working dir
-#$ -wd /home/students/4302001/arctic-connectivity/diagnostics
+#$ -wd /science/users/4302001/arctic-connectivity/diagnostics
 
 source $HOME/start_conda.sh
-cd /home/students/4302001/arctic-connectivity/diagnostics
+cd /science/users/4302001/arctic-connectivity/diagnostics
 
 # COMMANDS HERE
 python particle_animation.py

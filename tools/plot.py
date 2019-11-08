@@ -112,9 +112,9 @@ def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180
         # Set units
         if units:
             if wedge:
-                cbar.ax.set_xlabel(f"({str(units)})")
+                cbar.ax.set_xlabel(f"{str(units)}")
             else:
-                cbar.ax.set_ylabel(f"({str(units)})")
+                cbar.ax.set_ylabel(f"{str(units)}")
     
     ax.set_title(title)
     # Export as figure
@@ -201,9 +201,9 @@ def triangular_field_from_dataset(lons, lats, triangles, data, latRange=(-90, 90
         # Set units
         if units:
             if wedge:
-                cbar.ax.set_xlabel(f"({str(units)})")
+                cbar.ax.set_xlabel(f"{str(units)}")
             else:
-                cbar.ax.set_ylabel(f"({str(units)})")
+                cbar.ax.set_ylabel(f"{str(units)}")
     
     ax.set_title(title)
     # Export as figure
@@ -219,7 +219,7 @@ def triangular_field_from_dataset(lons, lats, triangles, data, latRange=(-90, 90
 ########################################################################################
 
 def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
-                         coast=True, land=False, projection=False, polar=False, wedge=True, export=None, \
+                         coast=True, land=False, projection=False, polar=False, wedge=False, export=None, \
                          title="", colormap=None, size=None, **kwargs):
     # Extract Options
     minLat, maxLat = latRange
@@ -285,7 +285,7 @@ def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
 
 ########################################################################################
 
-def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, wedge=False, t_index=0, land=True, projection=False, polar=False, vectorField=False, export=None, t_end=None, titleAttribute="", colormap=None):
+def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, wedge=False, t_index=0, land=True, projection=False, polar=False, vectorField=False, export=None, t_end=None, titleAttribute="", size=None, colormap=None):
     """This function creates a cartopy plot of the input field.
     
     :param inputfield: field to plot
@@ -311,7 +311,10 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
     minLon, maxLon = lonRange
     lons    = inputfield.grid.lon
     lats    = inputfield.grid.lat
-    fig     = plt.figure()
+    if size:
+        fig     = plt.figure(figsize=size)
+    else:
+        fig     = plt.figure()
     if projection:
         map_crs = projection
     else:
@@ -445,7 +448,7 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
 
 
 class particleAnimation:
-    def create(pfile, field=None, lonRange=None, latRange=None, coast=True, land=False, projection=False, polar=False, wedge=False, times='flat', particle_subsample=1, title="", fps=24, colormap=None, size=None, cbar=True, units=None, **kwargs):
+    def create(pfile, field=None, lonRange=None, latRange=None, coast=True, land=False, projection=False, polar=False, wedge=False, times='flat', particle_subsample=1, title="", fps=24, colormap=None, size=None, cbar=True, units=None, s=0.01, **kwargs):
         """
         Create particle animations
         """
@@ -530,10 +533,13 @@ class particleAnimation:
                     plottimes = plottimes[~np.isnan(plottimes)]
                 except:
                     pass
-        currtime = time == plottimes[0]
     
         # Create initial scatter plot of particles
-        scat   = ax.scatter(lon[currtime], lat[currtime], c=lat[currtime], s=0.2, transform=ccrs.Geodetic(), zorder=10)
+        if times == 'flat':
+            scat   = ax.scatter(lon[:,0], lat[:,0], c=lat[:,0], s=s, transform=ccrs.Geodetic(), zorder=10)
+        else:
+            currtime = time == plottimes[0]
+            scat   = ax.scatter(lon[currtime], lat[currtime], c=lat[currtime], s=s, transform=ccrs.Geodetic(), zorder=10)
         
         # Colorbar
         if cbar:
@@ -550,17 +556,21 @@ class particleAnimation:
             # Set units
             if units:
                 if wedge:
-                    cbar.ax.set_xlabel(f"({str(units)})")
+                    cbar.ax.set_xlabel(f"{str(units)}")
                 else:
-                    cbar.ax.set_ylabel(f"({str(units)})")
+                    cbar.ax.set_ylabel(f"{str(units)}")
         
         head = fig.suptitle('Particles at time ' + str(plottimes[0])[:13])
         frames = np.arange(0, len(plottimes))
         
         # Animation
         def animate(t):
-            currtime = time == plottimes[t]
-            scat.set_offsets(np.vstack((lon[currtime], lat[currtime])).transpose())
+            if times == 'flat':
+                scat.set_offsets(np.vstack((lon[:, t], lat[:, t])).transpose())
+            else:
+                currtime = time == plottimes[t]
+                scat.set_offsets(np.vstack((lon[currtime], lat[currtime])).transpose())
+            scat.set_color
             head.set_text('Particles at time ' + str(plottimes[t])[:13])
             return scat,
         

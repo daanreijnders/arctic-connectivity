@@ -15,11 +15,21 @@ def wrapLon(particle, fieldset, time):
         particle.lon = particle.lon - 360.
     if particle.lon < -180.:
         particle.lon = particle.lon + 360.
+
+def northPolePushBack(particle, fieldset, time):
+    if particle.lat > 89.915:
+        particle.lat = 89.915
         
 # Freeze particles that get out of bounds
-def freezeOutOfBounds(particle, fieldset, time):
+def freezeOutOfBoundsWedge(particle, fieldset, time):
     lon, lat = (particle.lon, particle.lat)
-    if lon > 65 or lon < -45 or lat > 85 or lat < 60:
+    if lon > 65. or lon < -45. or lat > 85. or lat < 60.:
+        particle.inBounds = 0
+
+# Freeze particles that get out of bounds
+def freezeOutOfBoundsArctic(particle, fieldset, time):
+    lon, lat = (particle.lon, particle.lat)
+    if lat < 60.:
         particle.inBounds = 0
 
 # Advection kernel. Checks first whether a particle is within bounds and whether it is not beached.        

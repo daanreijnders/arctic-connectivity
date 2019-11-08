@@ -191,11 +191,19 @@ class particles:
         except AttributeError:
             pass
         # Use scipy.interpolate.griddata to have particles adopt value of landmask from nearest neighbor
-        lonlatMask = griddata(np.dstack((fieldset.U.grid.lon.flatten(), 
-                                         fieldset.U.grid.lat.flatten()))[0,:,:], 
-                              landMask.flatten(), 
-                              self.lonlat[0,:,:], 
-                              method='nearest')
+        if fieldset.U.grid.lon.ndim == 1:
+            mesh = np.meshgrid(fieldset.U.grid.lon, fieldset.U.grid.lat)
+            lonlatMask = griddata(np.dstack((mesh[0].flatten(), 
+                                             mesh[1].flatten()))[0,:,:], 
+                                  landMask.flatten(), 
+                                  self.lonlat[0,:,:], 
+                                  method='nearest')
+        else: 
+            lonlatMask = griddata(np.dstack((fieldset.U.grid.lon.flatten(), 
+                                             fieldset.U.grid.lat.flatten()))[0,:,:], 
+                                  landMask.flatten(), 
+                                  self.lonlat[0,:,:], 
+                                  method='nearest')
         self.lonlat = self.lonlat[:, ~lonlatMask, :]
         self.lons = self.lonlat[0, :, 0]
         self.lats = self.lonlat[0, :, 1]
@@ -730,6 +738,23 @@ class hexCountBins(countBins):
                 self.adjacencyDict[currentCommunity].add(int(self.communityID[neighbor]))
         return self.adjacencyDict
     
+    def flag_on_boundary(self):
+        """
+        Checks whether a cell is on a boundary between two communities.
+        
+        Returns
+        -------
+        np.array
+            Array with 1 if cell is on a boundary and 0 if it is not
+        """
+        self.onBoundary = np.zeros(self.bindex.shape)
+        for vertex in self.bindex:
+            currentCommunity = int(self.communityID[vertex])
+            for neighbor in self.subsettedNeighbors[vertex]:
+                if int(self.communityID[neighbor]) != currentCommunity:
+                            self.onBoundary[vertex] = 1
+        return self.onBoundary
+    
 class hexMask:
     """
     Mask that can be used to determine which generating vertices in hexCountBins are kept,
@@ -874,9 +899,11 @@ class transMat:
             # Convert spherical coordinates to cartesian
             xInit, yInit, zInit = get_cartesian(lonlatInit[0,:,0], lonlatInit[0,:,1], mode='deg')
             xFinal, yFinal, zFinal = get_cartesian(lonlatFinal[0,:,0], lonlatFinal[0,:,1], mode='deg')
+            # Check which indices are non NaNs (checking only for x, since NaNs in lonlat propagate in x,y,z equally)
+            noNaNIndices = np.logical_and(~np.isnan(xInit), ~np.isnan(xFinal))                      
             # Find index of containing Voronoi region by querying tree
-            bindexInit = countBins.tree.query(np.dstack((xInit, yInit, zInit))[0])[1]
-            bindexFinal = countBins.tree.query(np.dstack((xFinal, yFinal, zFinal))[0])[1]
+            bindexInit = countBins.tree.query(np.dstack((xInit, yInit, zInit))[0][noNaNIndices])[1]
+            bindexFinal = countBins.tree.query(np.dstack((xFinal, yFinal, zFinal))[0][noNaNIndices])[1]
             
         # `counter` counts particles from bindexInit to bindexFinal. Square matrix should be of size countBins.n
         counter = np.zeros((countBins.n, countBins.n))
