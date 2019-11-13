@@ -42,7 +42,7 @@ def set_wedge_boundary(ax, minLon, maxLon, minLat, maxLat):
 ########################################################################################
 def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180), \
                     coast=True, land=False, projection=False, polar=False, wedge=False, export=None, \
-                    units=None, t_end=None, title="", colormap=None, size=None, cbar=True, **kwargs):
+                    units=None, t_end=None, title="", colormap=None, size=None, cbar=True, cbextend='neither', **kwargs):
     # Extract Options
     minLat, maxLat = latRange
     minLon, maxLon = lonRange
@@ -103,11 +103,11 @@ def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180
         if wedge:
             ax_cb = divider.new_vertical(size="5%", pad=0.1, axes_class=plt.Axes, pack_start=True)
             fig.add_axes(ax_cb)
-            cbar = plt.colorbar(plotfield, cax=ax_cb, orientation='horizontal')
+            cbar = plt.colorbar(plotfield, cax=ax_cb, orientation='horizontal', extend=cbextend)
         else:
             ax_cb = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
             fig.add_axes(ax_cb)
-            cbar = plt.colorbar(plotfield, cax=ax_cb)
+            cbar = plt.colorbar(plotfield, cax=ax_cb, extend=cbextend)
         
         # Set units
         if units:
@@ -131,7 +131,7 @@ def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180
 
 def triangular_field_from_dataset(lons, lats, triangles, data, latRange=(-90, 90), lonRange=(-180, 180), \
                     coast=True, land=False, projection=False, polar=False, wedge=False, export=None, \
-                    units=None, t_end=None, title="", colormap=None, size=None, cbar=True, **kwargs):
+                    units=None, t_end=None, title="", colormap=None, size=None, cbar=True, cbextend='neither', **kwargs):
     # Extract Options
     minLat, maxLat = latRange
     minLon, maxLon = lonRange
@@ -192,11 +192,11 @@ def triangular_field_from_dataset(lons, lats, triangles, data, latRange=(-90, 90
         if wedge:
             ax_cb = divider.new_vertical(size="5%", pad=0.1, axes_class=plt.Axes, pack_start=True)
             fig.add_axes(ax_cb)
-            cbar = plt.colorbar(plotfield, cax=ax_cb, orientation='horizontal')
+            cbar = plt.colorbar(plotfield, cax=ax_cb, orientation='horizontal', extend=cbextend)
         else:
             ax_cb = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
             fig.add_axes(ax_cb)
-            cbar = plt.colorbar(plotfield, cax=ax_cb)
+            cbar = plt.colorbar(plotfield, cax=ax_cb, extend=cbextend)
         
         # Set units
         if units:
@@ -285,7 +285,7 @@ def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
 
 ########################################################################################
 
-def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, wedge=False, t_index=0, land=True, projection=False, polar=False, vectorField=False, export=None, t_end=None, titleAttribute="", size=None, colormap=None):
+def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWidth=1, latRange=(-90, 90), lonRange=(-180, 180), coast=True, wedge=False, t_index=0, land=True, projection=False, polar=False, vectorField=False, export=None, t_end=None, titleAttribute="", size=None, colormap=None, cbextend='neither'):
     """This function creates a cartopy plot of the input field.
     
     :param inputfield: field to plot
@@ -408,7 +408,7 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
     divider = make_axes_locatable(ax)
     ax_cb   = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
     fig.add_axes(ax_cb)
-    cbar    = plt.colorbar(plotfield, cax=ax_cb)
+    cbar    = plt.colorbar(plotfield, cax=ax_cb, extend=cbextend)
     
         # Set units
     if particleDensity:
@@ -448,7 +448,7 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
 
 
 class particleAnimation:
-    def create(pfile, field=None, lonRange=None, latRange=None, coast=True, land=False, projection=False, polar=False, wedge=False, times='flat', particle_subsample=1, title="", fps=24, colormap=None, size=None, cbar=True, units=None, s=0.01, **kwargs):
+    def create(pfile, field=None, lonRange=None, latRange=None, coast=True, land=False, projection=False, polar=False, wedge=False, times='flat', particle_subsample=1, title="", fps=24, colormap=None, size=None, cbar=True, cbextend='neither', units=None, s=0.01, **kwargs):
         """
         Create particle animations
         """
@@ -547,11 +547,11 @@ class particleAnimation:
             if wedge:
                 ax_cb = divider.new_vertical(size="5%", pad=0.1, axes_class=plt.Axes, pack_start=True)
                 fig.add_axes(ax_cb)
-                cbar = plt.colorbar(scat, cax=ax_cb, orientation='horizontal')
+                cbar = plt.colorbar(scat, cax=ax_cb, orientation='horizontal', extend=cbextend)
             else:
                 ax_cb = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
                 fig.add_axes(ax_cb)
-                cbar = plt.colorbar(scat, cax=ax_cb)
+                cbar = plt.colorbar(scat, cax=ax_cb, extend=cbextend)
 
             # Set units
             if units:
