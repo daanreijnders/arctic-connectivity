@@ -294,31 +294,26 @@ class countBins:
         #------ END PARSERS ------#
         communityID = -np.ones(self.n, dtype=int)
         communityFlow = -np.ones(self.n, dtype=float)
-        if hasattr(self, 'nonEmptyBindex'):
-            bindex = myBins.nonEmptyBindex
+        if hasattr(self, 'oceanMask'):
+            bindex = self.bindex[self.oceanMask]
         else:
-            bindex = myBins.bindex
-        assert myBins.communityDF.shape[0] == bindex.shape[0], "Number of nodes in `.clu` file must equal the amount of non-empty bins."
+            bindex = self.bindex
+        assert self.communityDF.shape[0] == bindex.shape[0], "Number of nodes in `.clu` file must equal the amount of non-empty bins."
         for index, row in self.communityDF.iterrows():
             # -1 because counting in clu file starts at 1
             communityID[bindex[index-1]] = row['module'].astype(int)
             communityFlow[bindex[index-1]] = row['flow']
-#         else:
-#             assert myBins.communityDF.shape[0] == myBins.bindex.shape[0], "Number of nodes in `.clu` file must equal the amount of bins."
-#             for index, row in self.communityDF.iterrows():
-#                 # -1 because counting in clu file starts at zero
-#                 communityID[index-1] = row['module'].astype(int)
-#                 communityFlow[index-1] = row['flow']
+
         self.communityID = np.ma.masked_equal(communityID, -1)
         self.communityFlow = np.ma.masked_equal(communityFlow, -1)
         
         self.communityIdx = {}
         for community in np.unique(self.communityID).data[np.unique(self.communityID).data != -1]:
             self.communityIdx[community] = {'bindex' : {},
-                                            'nonEmptyBindex' : {}}
+                                            'oceanBindex' : {}}
             self.communityIdx[community]['bindex'] = self.bindex[self.communityID == community]
             nonZeroCommunityID = self.communityID.data[self.communityID.data != -1]
-            self.communityIdx[community]['nonEmptyBindex'] = np.arange(nonZeroCommunityID.size)[nonZeroCommunityID == community]
+            self.communityIdx[community]['oceanBindex'] = np.arange(nonZeroCommunityID.size)[nonZeroCommunityID == community]
 
     def color_communities(self, colors=4):
         """Associate new colors to existing communities by using graph coloring.
@@ -349,10 +344,7 @@ class countBins:
         maxColor = max(list(self.colorMapping.values()))
         for i in range(len(self.communityID.flatten())):
             if not np.ma.is_masked(self.communityID.flatten()[i]):
-                try:
-                    colorID[i] = self.colorMapping[self.communityID.flatten()[i]]
-                except KeyError:
-                    colorID[i] = maxColor + 1
+                colorID[i] = self.colorMapping.get(self.communityID.flatten()[i], maxColor + 1)
         self.colorID = np.ma.masked_equal(colorID, -1).reshape(self.communityID.shape)
         return self.colorID
     
@@ -372,11 +364,13 @@ class countBins:
         """
         self.coherenceRatioDict = {}
         for community, idx in self.communityIdx.items():
-            self.coherenceRatioDict[community] = np.sum(np.sum(transMat.counter[idx["nonEmptyBindex"], :][:, idx["nonEmptyBindex"]], axis=1))/np.sum(np.sum(transMat.counter[idx["nonEmptyBindex"], :], axis=1))
+            denom = np.sum(np.sum(transMat.counter[idx["oceanBindex"], :], axis=1))
+            if denom != 0:
+                self.coherenceRatioDict[community] = np.sum(np.sum(transMat.counter[idx["oceanBindex"], :][:, idx["oceanBindex"]], axis=1))/denom
         coherenceRatio = -np.ones(self.n, dtype=float)
         for i in range(len(self.communityID.flatten())):
             if not np.ma.is_masked(self.communityID.flatten()[i]):
-                coherenceRatio[i] = self.coherenceRatioDict[self.communityID.flatten()[i]]
+                coherenceRatio[i] = self.coherenceRatioDict.get(self.communityID.flatten()[i], -1)
         self.coherenceRatio = np.ma.masked_equal(coherenceRatio, -1).reshape(self.communityID.shape)
         return self.coherenceRatio
     
@@ -407,7 +401,7 @@ class countBins:
         """
         self.mixingDict = {}
         for community, idx in self.communityIdx.items():
-            subsetCounter = transMat.counter[idx["nonEmptyBindex"], :][:, idx["nonEmptyBindex"]]
+            subsetCounter = transMat.counter[idx["oceanBindex"], :][:, idx["oceanBindex"]]
             subsetSums = np.tile(subsetCounter.sum(axis=1), (subsetCounter.shape[1],1)).T
             R = np.divide(subsetCounter, subsetSums, out=np.zeros_like(subsetSums), where=subsetSums!=0)
             if R.shape[0] > 1: 
@@ -433,7 +427,7 @@ class countBins:
         assert hasattr(self, "mixing"), "Coherence ratios must be calculated first. Try calling the `calculate_coherence_ratio(transMat)` method."
         self.globalMixing = self.mixing[~self.mixing.mask].mean()
         return self.globalMixing
-    
+        
 class regularCountBins(countBins):
     def __init__(self, nlon, nlat, minLat=60., maxLat=90., minLon=-180, maxLon=180, **kwargs):
         """
@@ -468,7 +462,11 @@ class regularCountBins(countBins):
         self.gridShape = self.lonIdx2D.shape
         self.bindex = (np.arange(len(self.lonIdx2D.flatten())))
         self.bindex2D = self.bindex.reshape(self.gridShape)
-        
+    
+    @property
+    def n(self):
+        return len(self.bindex)
+    
     def particle_count(self, particles, tindex=0):
         count = np.histogram2d(particles.lonlat[tindex,:,0], particles.lonlat[tindex,:,1], bins=[self.lonBounds, self.latBounds])[0]
         if tindex == 0:
@@ -522,7 +520,7 @@ class regularCountBins(countBins):
                         self.adjacencyDict[currentCommunity].add(int(communityID2D[i-1, j+1//self.gridShape[1]]))
                         self.adjacencyDict[currentCommunity].add(int(communityID2D[i-1, j-1]))
         return self.adjacencyDict
-    
+        
 class hexCountBins(countBins):
     """
     Basic instance of hexagonal counting bins. 
@@ -734,13 +732,13 @@ class hexCountBins(countBins):
                 self.subsettedNeighbors[self.shiftedRimBindex[vertex]].add(self.shiftedRimBindex[(vertex + 1) % self.nLon])
                 self.subsettedNeighbors[self.shiftedRimBindex[vertex]].add(self.shiftedRimBindex[(vertex - 1) % self.nLon])
                 
-        if hasattr(self, "nonEmptyBools"):
+        if hasattr(self, "oceanMask"):
             for vertex in self.bindex:
-                if not self.nonEmptyBools[vertex]:
+                if not self.oceanMask[vertex]:
                     del self.subsettedNeighbors[vertex]
                 else:
                     for neighbor in list(self.subsettedNeighbors[vertex]):
-                        if not self.nonEmptyBools[neighbor]:
+                        if not self.oceanMask[neighbor]:
                             self.subsettedNeighbors[vertex].remove(neighbor)
             
     def create_KDTree(self):
@@ -793,9 +791,9 @@ class hexCountBins(countBins):
         transdict = dict(zip(vals, counts))
         # Arange counts in the correct order of bin indices
         if hasattr(self, "svDomainMask"):
-            count = np.array([transdict[i] if i in transdict.keys() else 0 for i in self.svSimplices[:,0][self.svDomainMask]])
+            count = np.array([transdict[i] if i in transdict.keys() else 0 for i in self.bindex])
         else:
-            count = np.array([transdict[i] if i in transdict.keys() else 0 for i in self.svSimplices[:,0]])
+            count = np.array([transdict[i] if i in transdict.keys() else 0 for i in self.bindex])
         if tindex == 0:
             self.initCount = count
         return count
@@ -879,7 +877,36 @@ class hexCountBins(countBins):
         latCenters = np.linspace(minLat + dlat/2, maxLat - dlat/2)
         self.rimBindex = np.arange(nLon)
         self.shiftedRimBindex = self.rimBindex + self.hexBindex.shape[0]
-    
+
+    def oceanMask_from_particles(self, particles, fieldset=None):
+        """
+        Construct a mask of which bins are (partially) in the ocean. 
+        It is constructed by checking which bins have an initial particle count of at least zero,
+        so it is therefore an approximation. In case of a rimBin, all bins in the rim are flagged
+        as bins in the ocean, unless a fieldset is provided, in which case it is checked whether the 
+        there is any overlap between the negation of `fieldset.landMask` and the rimBins.
+        
+        Parameters
+        ----------
+        particles : comtools.particles
+            Particles used to test which cells are ocean (i.e. initially contain particles)
+        fieldset : parcels.FieldSet
+            Fieldset with landMask attribute to check if the rimBins contain any ocean cells.
+        """
+        initCount = self.particle_count(particles, tindex=0)
+        self.oceanMask = initCount > 0
+        if hasattr(self, "shiftedRimBindex"):
+            self.oceanMask[self.shiftedRimBindex] = True
+            if fieldset is not None:
+                minLatIdx = np.searchsorted(fieldset.U.grid.lat, self.rimLatBounds[0])
+                maxLatIdx = np.searchsorted(fieldset.U.grid.lat, self.rimLatBounds[1])
+                for i in self.rimBindex:
+                    minLonIdx = np.searchsorted(fieldset.U.grid.lon, self.rimLonBounds[i])
+                    maxLonIdx = np.searchsorted(fieldset.U.grid.lon, self.rimLonBounds[i])
+                    if not np.any(~fieldset.landMask[minLatIdx:(maxLatIdx+1)%fieldset.landMask.shape[0], minLonIdx:(maxLonIdx+1)%fieldset.landMask.shape[1]]):
+                        self.oceanMask[myBins.shiftedRimBindex[i]] = False
+        return self.oceanMask
+                        
 class hexMask:
     """
     Mask that can be used to determine which generating vertices in hexCountBins are kept,
@@ -961,7 +988,7 @@ class hexMask:
             return self.mask[index]
         except:
             raise IndexError("Mask growth level not available")
-    
+            
 class transMat:
     """
     Basic instance of transition matrix object
@@ -991,7 +1018,7 @@ class transMat:
         self.data = np.divide(self.counter, self.sums, out=np.zeros_like(self.sums), where=self.sums!=0)
     
     @classmethod
-    def from_lonlat(cls, lonlatInit, lonlatFinal, countBins, timedelta64 = None, ignore_empty = False, **kwargs):
+    def from_lonlat(cls, lonlatInit, lonlatFinal, countBins, timedelta64 = None, mask = None, **kwargs):
         """
         Create transition matrix from initial and final coordinate pairs, given a `countBins`
 
@@ -1006,8 +1033,8 @@ class transMat:
         timedelta64 : np.timedelta64
             Timedelta relating to the elapsed time of the particle run for which the transition 
             matrix is to be determined. Example: np.timedelta64(30,'D') for 30 days.
-        ignore_empty : bool
-            Only create a matrix using countBins that are not empty at the start and finish
+        mask : np.array with booleans
+             Array that selects bins to include.
 
         Returns
         -------
@@ -1015,6 +1042,10 @@ class transMat:
             Transition matrix object, including attributes `counter` containing particle
             tranistions, and  `sums` used for normalization.
         """
+        try:
+            assert mask.shape == countBins.bindex.shape, "oceanMask must have same shape as bindex"
+        except NameError:
+            pass
         # Find initial and final counting bin index for each particle
         if countBins.binType == 'regular':
             # Search for insertion bindex for initial and final lon and lat. -1 because we are using bounds
@@ -1072,19 +1103,16 @@ class transMat:
                     counter[sourceIdx, destIdx] += 1
             elif countBins.binType == 'hexagonal':
                 counter[bindexInit[i], bindexFinal[i]] += 1
-                
-        if ignore_empty:
-            empty = np.logical_and(np.sum(counter, axis=0) == 0, np.sum(counter, axis=1) == 0)
-            countBins.nonEmptyBools = ~empty
-            countBins.nonEmptyBindex = countBins.bindex[~empty]
-            if hasattr(countBins, "rimBindex"):
-                countBins.nonEmptyHexBindex = countBins.hexBindex[~empty[countBins.hexBindex]]
-                countBins.nonEmptyRimBindex = countBins.rimBindex[~empty[countBins.rimBindex]]
-            counter = counter[~empty][:, ~empty]
+         
+        try:
+            counter = counter[mask][:, mask]
+        except NameError:
+            pass
+        
         return cls(counter, **kwargs)
     
     @classmethod
-    def from_pset(cls, pset, countBins, timedelta64 = None, ignore_empty = False, **kwargs):
+    def from_pset(cls, pset, countBins, **kwargs):
         """
         Create transition matrix from particle trajectories (from `pset`) given a `countBins` object.
 
@@ -1094,11 +1122,6 @@ class transMat:
             Particle set containing particle trajectories.
         countBins : comtools.countBins
             Grid containing cells on which the transition matrix is to be created.
-        timedelta64 : np.timedelta64
-            Timedelta relating to the elapsed time of the particle run for which the transition 
-            matrix is to be determined. Example: np.timedelta64(30,'D') for 30 days.
-        ignore_empty : bool
-            Only create a matrix using countBins that are not empty at the start and finish
 
         Returns
         -------
@@ -1106,8 +1129,8 @@ class transMat:
             Transition matrix object, including attributes `counter` containing particle
             tranistions, and  `sums` used for normalization.
         """
-        lonlatInit, lonlatFinal = lonlat_from_pset(pset, timedelta64)
-        return cls.from_lonlat(lonlatInit, lonlatFinal, countBins, timedelta64, ignore_empty, **kwargs)
+        lonlatInit, lonlatFinal = lonlat_from_pset(pset, kwargs.get('timedelta64', None))
+        return cls.from_lonlat(lonlatInit, lonlatFinal, countBins, **kwargs)
     
     def save_counter(self, file):
         """
