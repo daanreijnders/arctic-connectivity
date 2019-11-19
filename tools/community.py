@@ -244,6 +244,8 @@ class particles:
             else:
                 plt.savefig(f'figures/{export}.png', dpi=300)
         return ax
+    
+
         
 class countBins:
     """
@@ -427,6 +429,15 @@ class countBins:
         assert hasattr(self, "mixing"), "Coherence ratios must be calculated first. Try calling the `calculate_coherence_ratio(transMat)` method."
         self.globalMixing = self.mixing[~self.mixing.mask].mean()
         return self.globalMixing
+    
+    def nComs(self, cutoff=0):
+        """
+        Returns number of communities larger than `cutoff`.
+        """
+        counts = np.unique(self.communityID, return_counts=True)[2]
+        return np.sum(counts > cutoff)
+    
+    
         
 class regularCountBins(countBins):
     def __init__(self, nlon, nlat, minLat=60., maxLat=90., minLon=-180, maxLon=180, **kwargs):

@@ -32,7 +32,8 @@ def advection(fieldset,
               dt = delta(minutes = 5),
               outputdt = delta(hours = 12),
               overwrite = False,
-              noFreezeUnbeach = False
+              freeze = True,
+              unBeach = False
              ):
     """
     Advect particles on a `fieldset`. Original particle locations are stored in `particleGrid` object.
@@ -53,19 +54,24 @@ def advection(fieldset,
         Timestep between saved output.
     overwrite : bool
         If True, overwrite existing psets.
+    freeze : bool
+        If True, freeze particles leaving the boundary
     unBeach : bool
         If True, use anti-beaching kernel
-    freezeOnExit : bool
-        If True, freeze out-of-bound particles
         
     Returns
     -------
     parcels.ParticleSet
         Contains particle trajectories.
     """
-    if not noFreezeUnbeach:
+    if unBeach:
         assert hasattr(fieldset, 'UVunbeach'), "To unbeach, UVunbeach must be in fieldset!"
+    if freeze and unBeach:
         pclass = kernelCollection.unbeachableBoundedParticle
+    elif freeze:
+        pclass = kernelCollection.boundedParticle
+    elif unBeach:
+        pclass = kernelCollection.unbeachableParticle
     else: 
         pclass = JITParticle
     pset = ParticleSet.from_list(fieldset = fieldset,
@@ -73,17 +79,28 @@ def advection(fieldset,
                                  lon = particles.lonlat[0,:,0],
                                  lat = particles.lonlat[0,:,1],
                                  time = particles.releaseTimes)
-    if not noFreezeUnbeach:
-        print("Particles will be unbeached and frozen upon leaving the domain")
-    else:
-        print("Particles will not be frozen upon leaving the domain and are allowed to beach")
     
     # Set kernels
-    kernels = pset.Kernel(kernelCollection.northPolePushBack) + pset.Kernel(kernelCollection.advectionRK4) + pset.Kernel(kernelCollection.wrapLon)
-    if not noFreezeUnbeach:
-        kernels += pset.Kernel(kernelCollection.freezeOutOfBoundsArctic) + pset.Kernel(kernelCollection.beachTesting) + pset.Kernel(kernelCollection.unBeaching)
+    kernels = pset.Kernel(kernelCollection.northPolePushBack)
+    if freeze and unBeach:
+        kernels += kernelCollection.UnbeachBoundedAdvectionRK4
+        print("Particles will be unbeached and will be frozen upon leaving the domain.")
+    elif freeze:
+        kernels += kernelCollection.BoundedAdvectionRK4
+        print("Particles will not be unbeached and will be frozen upon leaving the domain.")
+    elif unBeach: 
+        kernels += kernelCollection.UnbeachAdvectionRK4
+        print("Particles will be unbeached and are allowed to leave the domain.")
+    else:
+        kernels += pset.Kernel(AdvectionRK4)
+        print("Particles will not be unbeached and are allowed to leave the domain.")
+
+    kernels += pset.Kernel(kernelCollection.wrapLon)
+    if freeze:
+        kernels += pset.Kernel(kernelCollection.freezeOutOfBoundsArctic)
+    if unBeach:
+        kernels += pset.Kernel(kernelCollection.beachTesting) + pset.Kernel(kernelCollection.unBeaching)
         
-                  
     # Check if file exists    
     if os.path.exists(writedir+"pset_"+experiment_name+".nc"):
         if overwrite == True:
@@ -118,7 +135,8 @@ if __name__ == '__main__':
     parser.add_argument('-odt', '--outputdt', default=24, type=int, help='Output timestep in hours')
     parser.add_argument('-r', '--refinement', default=11, type=int, help='Refinement level of the icosahedral mesh')
     parser.add_argument('--noLandDelete', action='store_true', help='Do not remove particles initialized on land.')
-    parser.add_argument('--noFreezeUnbeach', action='store_true', help='Let particles leave the domain and do not unbeach.')
+    parser.add_argument('--noFreeze', action='store_true', help='Let particles leave the domain.')
+    parser.add_argument('--unBeach', action='store_true', help='Unbeach particles')
  
     
     args = parser.parse_args()
@@ -133,10 +151,12 @@ if __name__ == '__main__':
     releaseTime = datetime(start_year, start_month, start_day, 12)
     refinement = args.refinement
     experiment_name = f"Rcmems_Pico{refinement}_S{start_year}-{start_month}-{start_day}_D{args.days}_DT{args.advectdt}_ODT{args.outputdt}"
-    if args.noFreezeUnbeach:
-        experiment_name += '_noFreezeUnbeach'
+    if args.unBeach:
+        experiment_name += '_unBeach'
+    if args.noFreeze:
+        experiment_name += '_noFreeze'
     
-    fieldset = fieldsetter_cmems.create(args.start_date, args.days+2, antiBeach=not args.noFreezeUnbeach, halo=True)
+    fieldset = fieldsetter_cmems.create(args.start_date, args.days+2, antiBeach = args.unBeach, halo=True)
     
     # Read start date   
     start_year = int(args.start_date[0:4])
@@ -162,5 +182,6 @@ if __name__ == '__main__':
                          dt = dt,\
                          outputdt = outputdt,\
                          experiment_name = experiment_name,
-                         noFreezeUnbeach = args.noFreezeUnbeach
+                         freeze = not args.noFreeze,
+                         unBeach = args.unBeach
                          )
