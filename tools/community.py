@@ -6,7 +6,7 @@ import networkx as nx
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree, SphericalVoronoi
 from scipy import sparse
-from astropy.coordinates import cartesian_to_spherical, spherical_to_cartesian
+from astropy.coordinates import cartesian_to_spherical
 import matplotlib.pyplot as plt
 import cartopy as cart
 from datetime import datetime
@@ -917,6 +917,27 @@ class hexCountBins(countBins):
                     if not np.any(~fieldset.landMask[minLatIdx:(maxLatIdx+1)%fieldset.landMask.shape[0], minLonIdx:(maxLonIdx+1)%fieldset.landMask.shape[1]]):
                         self.oceanMask[myBins.shiftedRimBindex[i]] = False
         return self.oceanMask
+    
+    
+    def pointToIdx(self, qlon, qlat):
+        """
+        Use nearest neighbor search to return bindex based on longitude and latitude.
+        
+        Parameters
+        ----------
+        qlon : int, float, np.array
+            Longitude to query
+        qlat : int, float, np.array
+            Latitude to query
+            
+        Returns
+        -------
+        np.array with indices.
+        """
+        lons = self.lons[self.mask[self.outerMaskLevel]]
+        lats = self.lats[self.mask[self.outerMaskLevel]]
+        binPoints = np.dstack((lons, lats))[0]
+        return griddata(binPoints, self.bindex, np.dstack((qlon, qlat))[0], method="nearest")
                         
 class hexMask:
     """
@@ -1159,7 +1180,7 @@ class transMat:
         sparse.save_npz(file, transmatDataCOO)
     
     @classmethod
-    def from_counter_npz(self, file):
+    def from_counter_npz(cls, file):
         """
         Construct a transition matrix by loading a `counter` saved in .npz format.
         

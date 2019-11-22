@@ -1,7 +1,7 @@
 #/bin/bash
 
 # SGE: the job name
-#$ -N ParticleAdvectionDT60
+#$ -N ParticleAdvection
 #$ -V
 #$ -l h_rt=72:00:00 
 #$ -l hostname=science-bs36 #make sure it is in the right node
@@ -21,4 +21,4 @@ source $HOME/start_conda.sh
 cd /science/users/4302001/arctic-connectivity/advection
 
 # COMMANDS HERE
-python3 ../tools/advectParticles.py 20010101
+python3 ../tools/advectParticles.py 19940301

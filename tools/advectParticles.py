@@ -137,8 +137,7 @@ if __name__ == '__main__':
     parser.add_argument('--noLandDelete', action='store_true', help='Do not remove particles initialized on land.')
     parser.add_argument('--noFreeze', action='store_true', help='Let particles leave the domain.')
     parser.add_argument('--unBeach', action='store_true', help='Unbeach particles')
- 
-    
+   
     args = parser.parse_args()
     
     # Load Settings

@@ -41,6 +41,16 @@ def freezeOutOfBoundsArctic(particle, fieldset, time):
     lon, lat = (particle.lon, particle.lat)
     if lat < 60.:
         particle.inBounds = 0
+        
+def freezeOutOfBoundsArctic65(particle, fieldset, time):
+    lon, lat = (particle.lon, particle.lat)
+    if lat < 65.:
+        particle.inBounds = 0
+        
+def freezeOutOfBoundsArctic70(particle, fieldset, time):
+    lon, lat = (particle.lon, particle.lat)
+    if lat < 70.:
+        particle.inBounds = 0
 
 # Advection kernel. Checks first whether a particle is within bounds and whether it is not beached.        
 def UnbeachBoundedAdvectionRK4(particle, fieldset, time):
