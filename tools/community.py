@@ -319,19 +319,13 @@ class countBins:
 
     def color_communities(self, colors=4):
         """Associate new colors to existing communities by using graph coloring.
-        
-        Parameters
-        ----------
-        num_colors : int
-            Number of colors that will be used for coloring the map. Currently, if `num_colors` is less than or 
-            equal to the maximum degree, `num_colors` is increased to maxDegree+1.
 
         Returns
         -------
         np.array
             Array containing new community IDs, corresponding to different colors.
         """
-        num_colors=4
+
         try:
             self.communityNetwork = nx.Graph()
             for community in self.adjacencyDict:

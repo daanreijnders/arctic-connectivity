@@ -75,9 +75,9 @@ def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180
     
     # Add gridlines
     if projection or polar or wedge:
-        gl = ax.gridlines(linestyle='--', alpha=0.5, linewidth=0.5)
+        gl = ax.gridlines(linestyle='--', alpha=0.75, linewidth=0.5)
     else: 
-        gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.5, linewidth=0.5, draw_labels = True)
+        gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.75, linewidth=0.5, draw_labels = True)
         gl.xlabels_top   = False
         gl.ylabels_right = False
         gl.xformatter    = LONGITUDE_FORMATTER
@@ -164,9 +164,9 @@ def triangular_field_from_dataset(lons, lats, triangles, data, latRange=(-90, 90
     
     # Add gridlines
     if projection or polar or wedge:
-        gl = ax.gridlines(linestyle='--', alpha=0.5, linewidth=0.5)
+        gl = ax.gridlines(linestyle='--', alpha=0.75, linewidth=0.5)
     else: 
-        gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.5, linewidth=0.5, draw_labels = True)
+        gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.75, linewidth=0.5, draw_labels = True)
         gl.xlabels_top   = False
         gl.ylabels_right = False
         gl.xformatter    = LONGITUDE_FORMATTER
@@ -253,9 +253,9 @@ def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
     
     # Add gridlines
     if projection or polar or wedge:
-        gl = ax.gridlines(linestyle='--', alpha=0.5, linewidth=0.5)
+        gl = ax.gridlines(linestyle='--', alpha=0.75, linewidth=0.5)
     else: 
-        gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.5, linewidth=0.5, draw_labels = True)
+        gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.75, linewidth=0.5, draw_labels = True)
         gl.xlabels_top   = False
         gl.ylabels_right = False
         gl.xformatter    = LONGITUDE_FORMATTER
@@ -337,9 +337,9 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
     
     # Add gridlines
     if polar or projection:
-        gl = ax.gridlines(linestyle='--', alpha=0.5, linewidth=0.5)
+        gl = ax.gridlines(linestyle='--', alpha=0.75, linewidth=0.5)
     else: 
-        gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.5, linewidth=0.5, draw_labels = True)
+        gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.75, linewidth=0.5, draw_labels = True)
         gl.xlabels_top   = False
         gl.ylabels_right = False
         gl.xformatter    = LONGITUDE_FORMATTER
@@ -497,9 +497,9 @@ class particleAnimation:
         
             # Add gridlines
         if projection or polar or wedge:
-            gl = ax.gridlines(linestyle='--', alpha=0.5, linewidth=0.5)
+            gl = ax.gridlines(linestyle='--', alpha=0.75, linewidth=0.5)
         else: 
-            gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.5, linewidth=0.5, draw_labels = True)
+            gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.75, linewidth=0.5, draw_labels = True)
             gl.xlabels_top   = False
             gl.ylabels_right = False
             gl.xformatter    = LONGITUDE_FORMATTER

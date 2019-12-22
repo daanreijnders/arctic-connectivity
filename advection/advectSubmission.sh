@@ -21,4 +21,4 @@ source $HOME/start_conda.sh
 cd /science/users/4302001/arctic-connectivity/advection
 
 # COMMANDS HERE
-python3 ../tools/advectParticles.py 19940301
+python3 ../tools/advectParticles.py 20050301
