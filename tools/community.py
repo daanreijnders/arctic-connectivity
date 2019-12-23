@@ -372,7 +372,7 @@ class countBins:
     
     def calculate_global_coherence(self):
         """
-        Calculate the global coherence ratio.
+        Calculate the global coherence ratio, which is a weighted average of the coherence ratio.
         
         Returns
         -------
@@ -380,6 +380,7 @@ class countBins:
             Global coherence ratio        
         """
         assert hasattr(self, "coherenceRatio"), "Coherence ratios must be calculated first. Try calling the `calculate_coherence_ratio(transMat)` method."
+        # Note that this is self.coherenceRatio[~self.coherenceRatio.mask] provides values for each bin, such that the mean of this is a weighted average.
         self.globalCoherenceRatio = self.coherenceRatio[~self.coherenceRatio.mask].mean()
         return self.globalCoherenceRatio
     
@@ -413,7 +414,7 @@ class countBins:
     
     def calculate_global_mixing(self):
         """
-        Calculate the global mixing parameter.
+        Calculate the global mixing parameter, which is a weighted average version of the mixing parameter.
         
         Returns
         -------
@@ -421,6 +422,7 @@ class countBins:
             Global mixing parameter      
         """
         assert hasattr(self, "mixing"), "Coherence ratios must be calculated first. Try calling the `calculate_coherence_ratio(transMat)` method."
+        # Note that this is self.mixing[~self.mixing.mask] provides values for each bin, such that the mean of this is a weighted average.
         self.globalMixing = self.mixing[~self.mixing.mask].mean()
         return self.globalMixing
     
