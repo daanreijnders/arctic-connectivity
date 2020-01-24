@@ -1,37 +1,19 @@
+"""Find Jaccard indices between communities in different solutions."""
+
 import numpy as np
-from scipy.interpolate import griddata
-from scipy.spatial import SphericalVoronoi, cKDTree
-from scipy import sparse
 import xarray as xr
-import pandas as pd
 
 from itertools import combinations
-
-import matplotlib.pyplot as plt
-import cartopy as cart
-import cartopy.crs as ccrs
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-import cmocean
-
-from datetime import timedelta as delta
-from datetime import datetime
-
-import networkx as nx
 
 from parcels import (grid, Field, FieldSet, ParticleSet, JITParticle, ScipyParticle, AdvectionRK4,
                      ErrorCode, ParticleFile, Variable, plotTrajectoriesFile)
 import sys
 import pickle
-import copy
 from glob import glob
 from importlib import reload
-
 sys.path.append('/science/users/4302001/arctic-connectivity/tools')
 sys.path.append('/Users/daanreijnders/surfdrive/Thesis/repository/tools')
-import plot
 import community
-import fieldsetter_cmems
-import advectParticles
 
 readDir = "/data/oceanparcels/input_data/CMEMS/GLOBAL_REANALYSIS_PHY_001_030/"
 meanDir = "/data/oceanparcels/input_data/CMEMS/GLOBAL_REANALYSIS_PHY_001_030_monthly/"

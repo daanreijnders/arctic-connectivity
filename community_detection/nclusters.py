@@ -1,25 +1,14 @@
+"""Group communities in different solutions in clusters based on the Jaccard distance between communities."""
+
 import numpy as np
-from scipy.interpolate import griddata
-from scipy.spatial import SphericalVoronoi, cKDTree
 from scipy import sparse
 import xarray as xr
 import pandas as pd
 
 from itertools import combinations
 
-import matplotlib.pyplot as plt
-import cartopy as cart
-import cartopy.crs as ccrs
-from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-import cmocean
-
-from datetime import timedelta as delta
-from datetime import datetime
-
 import networkx as nx
 
-from parcels import (grid, Field, FieldSet, ParticleSet, JITParticle, ScipyParticle, AdvectionRK4,
-                     ErrorCode, ParticleFile, Variable, plotTrajectoriesFile)
 import sys
 import pickle
 import copy
