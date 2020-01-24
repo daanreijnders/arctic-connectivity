@@ -1,0 +1,1 @@
+This directory contains Conda environment specifications.

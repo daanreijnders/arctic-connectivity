@@ -1,10 +1,27 @@
-# Projecting oceanic connectivity in the changing Arctic, with applications to Marine Protected Area design
+# Assessing Ocean Surface Connectivity in the Arctic: Capabilities and caveats of community detection in Lagrangian Flow Networks
 
-## Thesis idea:
-The trajectory of particles in the ocean can be modeled using Lagrangian ocean analysis. This approach estimates the trajectory using velocity fields from OGCMs to integrate the local velocity of virtual particles. By dividing the ocean into grid cells, releasing an ensemble of virtual particle in each cell and determining the position of each particle after a timestep *dt*, a stochastic matrix can be created, indicating the probability that in one timestep a particle moves from one grid cell to another. This provides a measure of connectivity between distinct grid cells. By using tools from network theory, we can find *oceanic provinces*: groups of cells that are well connected with one another, but exchange fewer particles with other cells. This is done by first constructing a weighted network with grid cells as nodes and edges being weighted according to the particle transition probability (dependent on *dt*) from the stochastic matrix, which thus serves as the adjacency matrix of the network. Then, tools like graph partitioning or community detection are applied to identify internally well-connected regions and the boundaries between them.
+This repository contains Python scripts and notebooks used in my master's research project on investigating connectivity in the surface of the Arctic Ocean. Author is Daan Reijnders unless specified otherwise.
 
-One of the possible applications of identifying oceanic provinces is the design of marine protected areas (MPAs). The connectivity of MPAs is important for a population’s genetics, persistence and distribution. Identifying oceanic provinces in which grid cells are internally well-connected can thus contribute to the future design of MPAs.
+## Data used
+Hydrodynamical data from the `GLOBAL_REANALYSIS_PHY_001_030` dataset from the Copernicus Marine Environment Monitoring Service (CMEMS) is used. Data is loaded above 60N. Data is used between 1993 and 2018.
 
-The demarcation of oceanic provinces depends on the time scale dt as well as the evolution of the underlying flow field. Flow in the Arctic experiences yearly variation due to the seasonal cycle and is projected to change substantially in the coming decades due to the trend of declining sea ice extent.
+## Environment
+Packages used can be found in the import list of each file. The Conda environment used in this thesis can be found in the `meta` directory. 
 
-In my research project, I want to investigate the impact of changing flow in the arctic on the topology of oceanic provinces. I aim to create an understanding of the different physical processes at play and how they map to changes in this topology. This can be applied to MPA design by identifying areas that are suitable for MPA allocation while sustaining their function over long timespans in the changing Arctic.
+## Main pipeline
+1. Particles are initialized with the `community.particles` class.
+2. A `parcels.fieldset` is initialized with `fieldsetter_cmems` script.
+3. Particles are advected using Parcles through the `advectParticles` script.
+4. A Lagrangian flow network is constructed using the `community.countBins` and `community.transMat` classes.
+5. The community detection algorithm *Infomap* (version 1.0.0-beta.51) is applied on the Lagrangian flow network (`.net` file). Options used:
+    * `-d` specifies that the network is directed
+    * `-k` include self-edges
+    * `--clu` print a .clu file with the top cluster ids for each node
+    * `--markov-time` to specify the markov-time (almost always 2)
+    * `-N 20` always run Infomap 20 times and choose the best solution
+    * `-s` random seed. Almost always `314159`, unless seeking degenerate solutions. Then the range of seeds is 1..100.
+6. The resulting community description (`.clu` file) is loaded using `community.countBins`.
+7. Results are plotted and further analyzed in notebooks in `community_detection` directory.
+
+## Thesis abstract
+Community detection algorithms from the field of network theory have been used to divide a fluid domain into clusters that are sparsely connected with each other and to identify barriers to transport, for example in the context of larval dispersal. Communities detected by the community detection algorithm *Infomap* have barriers that have been shown to often coincide with well-known oceanographic features. We apply this method to the surface of the Arctic and subarctic oceans. Thus far, this method has only been applied to closed domains such as the Mediterranean. We apply this method to the surface of the Arctic and subarctic oceans and show that it can be applied to open domains. First, we construct a Lagrangian flow network by simulating the exchange of Lagrangian particles between different bins in an icosahedral-hexagonal grid. Then, *Infomap* is applied to identify groups of well-connected bins. The resolved transport barriers include naturally occurring structures, such as the major currents. As expected, clusters in the Arctic are affected by seasonal and decadal variations in sea-ice concentration. We also discuss several caveats of this method. Firstly, there is no single definition of what makes a cluster, since this is dependent on a preferred balance of internally high connectivity, sparse connectivity between clusters, and the spatial scale of investigation. Secondly, many different divisions into clusters may qualify as good solutions and it may thus be misleading to only consider the solution that optimizes a certain quality parameter the most. Finally, while certain cluster boundaries lie consistently at the same location between different good solutions, other boundary locations vary significantly, making it difficult to assess the physical meaning of a single solution. Particularly in the context of practical applications like planning Marine Protected Areas, it is important to consider an ensemble of qualifying solutions to find persistent boundaries.
