@@ -1,9 +1,5 @@
+"""Creates pickle files with the lats and lons of icosahedral meshes at a given grid refinement."""
 import stripy as stripy
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import path as mpath
-import cartopy as cart
-import cartopy.crs as ccrs
 import pickle
 
 def save_ico_mesh_particles(refinement):

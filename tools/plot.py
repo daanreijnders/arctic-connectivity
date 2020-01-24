@@ -75,7 +75,7 @@ def field_from_dataset(lons, lats, data, latRange=(-90, 90), lonRange=(-180, 180
     
     # Add gridlines
     if projection or polar or wedge:
-        gl = ax.gridlines(linestyle='--', alpha=0.75, linewidth=0.5)
+        gl = ax.gridlines(linestyle='--', alpha=0.8, linewidth=1.25)
         gl.n_steps = 90
     else: 
         gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.75, linewidth=0.5, draw_labels = True)
@@ -165,7 +165,7 @@ def triangular_field_from_dataset(lons, lats, triangles, data, latRange=(-90, 90
     
     # Add gridlines
     if projection or polar or wedge:
-        gl = ax.gridlines(linestyle='--', alpha=0.75, linewidth=0.5)
+        gl = ax.gridlines(linestyle='--', alpha=0.8, linewidth=1.25)
         gl.n_steps = 90
 
     else: 
@@ -256,7 +256,7 @@ def scatter_from_dataset(lons, lats, latRange=(-90, 90), lonRange=(-180, 180), \
     
     # Add gridlines
     if projection or polar or wedge:
-        gl = ax.gridlines(linestyle='--', alpha=0.75, linewidth=0.5)
+        gl = ax.gridlines(linestyle='--', alpha=0.8, linewidth=1.25)
         gl.n_steps = 90
 
     else: 
@@ -342,7 +342,7 @@ def from_field(inputfield, trajectoryFile=None, particleDensity=False, binGridWi
     
     # Add gridlines
     if polar or projection:
-        gl = ax.gridlines(linestyle='--', alpha=0.75, linewidth=0.5)
+        gl = ax.gridlines(linestyle='--', alpha=0.8, linewidth=1.25)
         gl.n_steps = 90
     else: 
         gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.75, linewidth=0.5, draw_labels = True)
@@ -503,7 +503,7 @@ class particleAnimation:
         
             # Add gridlines
         if projection or polar or wedge:
-            gl = ax.gridlines(linestyle='--', alpha=0.75, linewidth=0.5)
+            gl = ax.gridlines(linestyle='--', alpha=0.8, linewidth=1.25)
             gl.n_steps = 90
         else: 
             gl = ax.gridlines(crs=map_crs, linestyle='--', alpha=0.75, linewidth=0.5, draw_labels = True)
