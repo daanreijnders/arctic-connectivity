@@ -1,3 +1,4 @@
+"""For an icosahedral mesh obtained through stripy at a given refinement level, delete the particles that lie on land."""
 import numpy as np
 import pickle
 

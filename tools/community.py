@@ -1,3 +1,4 @@
+"""Functions and classes for creating particle grids, counting bins and transition matrices."""
 # Imports
 import pandas as pd
 import numpy as np
@@ -122,10 +123,22 @@ class particles:
     
     @property
     def n(self):
+        """
+        Returns
+        -------
+        int
+            number of particles
+        """
         return self.lonlat.shape[1]
     
     @property
     def releaseTimes(self):
+        """
+        Returns
+        -------
+        list
+            Release times of particles
+        """
         if self._releaseTime:
             return [self._releaseTime for part in range(self.n)]
         else:
@@ -228,6 +241,8 @@ class particles:
             Index of lonlat pairs (0 is initial, 1 is final).
         export : str
             Name of exported figure. A directory 'figures' is created.
+        projection : cartopy.crs
+            Projection for showing particle set on.
         """
         fig = plt.figure()
         if projection:
@@ -257,7 +272,7 @@ class countBins:
         Indicates the type of bin: `regular` or `hexagonal`
     """
     
-    def load_communities(self, comFile, parser = 'clu'):
+    def load_communities(self, comFile):
         """
         Load communities determined by a community detection algorithm on a regular grid
         
@@ -265,35 +280,16 @@ class countBins:
         ----------
         comFile : str
             Filename of community file
-        parser : str
-            Parser to use
+
         """
-        #----- START PARSERS -----#
-        if parser == 'legacy':
-            self.communityDF = pd.read_csv(comFile,  delimiter=" ").set_index('node')
-        if parser == 'clu':
-            with open(comFile) as cluFile:
-                clu = cluFile.read().split('\n')
-            self.codelength = float(clu[0].split(' ')[3])
-            header = clu[1].split(' ')[1:]
-            body = [line.split(' ') for line in clu[2:] if line is not '']
-            self.communityDF = pd.DataFrame(body, columns=header).astype({"node" : 'int', 
-                                                                          "module" : 'int', 
-                                                                          "flow" : 'float' }).set_index("node")
-        if parser == 'tree':
-            """
-            Not yet fully impelemented. Should have the option to investigate multiple tree levels
-            """
-            with open(comFile) as treeFile:
-                tree = treeFile.read().split('\n')
-            self.codelength = float(tree[0].split(' ')[3])
-            header = tree[1].split(' ')[1:]
-            body = [line.split(' ') for line in tree[2:] if line is not '']
-            self.communityDF = pd.DataFrame(body, columns=header).drop(columns="name").rename(columns={'physicalId': 'node'})
-            self.communityDF['rank'] = self.communityDF['path'].map(lambda a: a.split(":")[-1])
-            self.communityDF['module'] = self.communityDF['path'].map(lambda a: a.split(":")[-2])
-            self.communityDF = self.communityDF.astype({"node" : "int",  "module" : "int", "flow" : "float"}).set_index("node")
-        #------ END PARSERS ------#
+        with open(comFile) as cluFile:
+            clu = cluFile.read().split('\n')
+        self.codelength = float(clu[0].split(' ')[3])
+        header = clu[1].split(' ')[1:]
+        body = [line.split(' ') for line in clu[2:] if line is not '']
+        self.communityDF = pd.DataFrame(body, columns=header).astype({"node" : 'int', 
+                                                                      "module" : 'int', 
+                                                                      "flow" : 'float' }).set_index("node")        
         communityID = -np.ones(self.n, dtype=int)
         communityFlow = -np.ones(self.n, dtype=float)
         if hasattr(self, 'oceanMask'):
@@ -472,9 +468,21 @@ class regularCountBins(countBins):
     
     @property
     def n(self):
+        """
+        Returns
+        -------
+        int
+            number of particles
+        """
         return len(self.bindex)
     
     def particle_count(self, particles, tindex=0):
+        """
+        Returns
+        -------
+        array
+            number of particles per bin
+        """
         count = np.histogram2d(particles.lonlat[tindex,:,0], particles.lonlat[tindex,:,1], bins=[self.lonBounds, self.latBounds])[0]
         if tindex == 0:
             self.initCount = count
@@ -1195,7 +1203,8 @@ class transMat:
         
         Returns
         -------
-        nx.DiGraph object describing the Markov chain defined by the transition matrix.
+        nx.DiGraph 
+            object describing the Markov chain defined by the transition matrix.
         """
         return nx.from_numpy_matrix(self.data, create_using=nx.DiGraph())
     

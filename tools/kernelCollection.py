@@ -1,3 +1,4 @@
+"""Kernels for advecting particles in Parcels"""
 from parcels import (JITParticle, Variable)
 import numpy as np
 

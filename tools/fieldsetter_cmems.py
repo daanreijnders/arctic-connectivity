@@ -1,5 +1,4 @@
 """
-@author: Daan Reijnders
 Function for easily setting fieldsets from Global Ocean Physical Reanalysis data in Parcels, including CLI.
 """
 import numpy as np

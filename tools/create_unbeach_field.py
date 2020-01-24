@@ -1,13 +1,8 @@
-
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """
 Created on December 1 2018
 @author: Philippe Delandmeter
 Function creating the unbeach velocity for the CMEMS data (A-grid)
 """
-
 
 import xarray as xr
 import numpy as np

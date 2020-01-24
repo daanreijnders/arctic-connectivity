@@ -1,3 +1,4 @@
+"""Advect particles in community.particles object using parcels. Includes CLI"""
 # Imports
 import numpy as np
 
@@ -8,9 +9,7 @@ from datetime import timedelta as delta
 from datetime import datetime
 
 import argparse
-from glob import glob
 import pickle
-import xarray as xr
 import os.path
 import warnings
 
@@ -20,7 +19,6 @@ sys.path.append('/Users/daanreijnders/surfdrive/Thesis/repo/tools')
 import fieldsetter_cmems
 import kernelCollection
 import community
-import advectParticles
 
 writedir = '/scratch/DaanR/psets/'
 
@@ -127,7 +125,6 @@ def advection(fieldset,
 
 if __name__ == '__main__':
     # Argument parsing
-    parser = argparse.ArgumentParser(description="Advect particles on a rectilinear grid.")
     parser = argparse.ArgumentParser(description="Advect particles on an icosahedral grid in the Arctic (>60N)")
     parser.add_argument('start_date', type=str, help="Particle initialization time. Must be formatted as YYYY-MM-DD.")
     parser.add_argument('-d', '--days', default=90, type=int, help='Number of days used for advection.')
@@ -170,9 +167,9 @@ if __name__ == '__main__':
                                     )
     del mesh
    
-    # Check whether land particles need to be removed
-#     if not args.noLandDelete:
-#         particles.remove_on_land(fieldset)
+    Check whether land particles need to be removed
+    if not args.noLandDelete:
+        particles.remove_on_land(fieldset)
     
     # Run
     pset_out = advection(fieldset,
