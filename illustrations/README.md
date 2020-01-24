@@ -1,0 +1,1 @@
+This directory contains notebooks for creating the illustrations used in my thesis.
