@@ -11,7 +11,7 @@ Packages used can be found in the import list of each file. The Conda environmen
 ## Main pipeline
 1. Particles are initialized with the `community.particles` class.
 2. A `parcels.fieldset` is initialized with `fieldsetter_cmems` script.
-3. Particles are advected using [Parcles](https://github.com/OceanParcels/parcels) through the `advectParticles` script.
+3. Particles are advected using [Parcels](https://github.com/OceanParcels/parcels) through the `advectParticles` script.
 4. A Lagrangian flow network is constructed using the `community.countBins` and `community.transMat` classes.
 5. The community detection algorithm *Infomap* (version 1.0.0-beta.51) is applied on the Lagrangian flow network (`.net` file). Options used:
     * `-d` specifies that the network is directed
