@@ -167,7 +167,7 @@ if __name__ == '__main__':
                                     )
     del mesh
    
-    Check whether land particles need to be removed
+    #Check whether land particles need to be removed
     if not args.noLandDelete:
         particles.remove_on_land(fieldset)
     
