@@ -3,6 +3,7 @@
 This repository contains Python scripts and notebooks used in my MSc research project on investigating connectivity in the surface of the Arctic Ocean. Author is Daan Reijnders unless specified otherwise.
 
 Publication (open access):
+
 Reijnders, D., van Leeuwen, E. J., & van Sebille, E. (2021). Ocean surface connectivity in the Arctic: Capabilities and caveats of community detection in Lagrangian flow networks. *Journal of Geophysical Research: Oceans*, 126, e2020JC016416. https://doi.org/10.1029/2020JC016416
 
 ## Data used
